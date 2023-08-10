@@ -41,7 +41,7 @@ To set up and deploy OpenBio, follow these steps:
    npm start
    ```
 
-6. **Access the Platform**: Open your web browser and navigate to `http://localhost:3000` to access the OpenBio platform.
+6. **Access the Platform**: Open your web browser and navigate to `http://localhost:(your port)` to access the OpenBio platform.
 
 ## Contributing
 
