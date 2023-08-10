@@ -1,0 +1,555 @@
+﻿
+@{
+    ViewBag.Title = "View User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .table > tbody > tr > td {
+        padding: 5px !important;
+    }
+</style>
+
+
+<div class="modal fade" id="updateModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="text-center text-bold">Update User</h5>
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form action="@Url.Action("PostUpdateUser","Admin")" method="post">
+
+                    <input type="hidden" name="Id" id="updId" />
+                    <input type="hidden" name="Role" id="upd_Role" />
+                    <input type="hidden" name="Status" id="upd_status" />
+                    <input type="hidden" name="way" value="@ViewBag.Way" />
+
+                    <div class="form-group">
+                        <label class="text-bold">First Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="FirstName" id="updFName" placeholder="Please Enter First Name" required>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="text-bold">Last Name <span class="text-danger">*</span></label>
+                        <input type="text" name="LastName" class="form-control" id="updLName" placeholder="Please Enter Last Name" required>
+                    </div>
+
+
+
+                    <div class="form-group">
+                        <label class="text-bold">Email <span class="text-danger">*</span></label>
+                        <input type="email" name="Email" id="updEmail" class="form-control" onkeyup="validateEmail(this.value)" placeholder="Add Email Here" required>
+                        <span class="text-danger" id="updEmailErrMsg"></span>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="text-bold">Password <span class="text-danger">*</span></label>
+                        <input type="password" name="Password" id="updPassword" class="form-control" placeholder="Set Login Password" required>
+                        <div class="input-group-addon">
+                            <input id="toggle" type="checkbox" class="pull-left"> <span id="toggleText" class="ml-5 pull-left">Show</span>
+                        </div>
+                    </div>
+
+                                @if (ViewBag.category == 2 || ViewBag.Role == 1)
+                            {
+                                <div class="form-group">
+                                    <label class="text-bold">Organization<span class="text-danger">*</span></label>
+                                    <select id="organizations" class="form-control" name="OrganizationId" placeholder="Select Organization" required>
+
+                                    </select>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" name="OrganizationId" value="@ViewBag.Organization"/>
+
+                            }
+
+                     <div id="studassigned" class="form-group">
+                        <label class="text-bold">Studies Assigned <span class="text-danger">*</span></label>
+                        <select name="StudyIds" id="studiesassigned" class="select" placeholder="Studies Assigned" multiple="multiple" required>
+                           
+                        </select>
+                        <hr/>
+                    </div>
+
+                    
+
+                    <div class="modal-footer">
+                        <button type="submit" value="submit" class="btn btn-primary" id="updSubBtn">Update</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row m-10">
+    <div class="panel panel-flat text-black">
+        <div class="panel-heading" style="background: #E8ECED; padding:1px !important;">
+            <h2 class="text-center text-black">
+                Search
+            </h2>
+            <div class="heading-elements">
+                <ul class="icons-list">
+                    <li><a data-action="collapse" class="rotate-180"></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body pt-20 pb-20" style="display: none">
+            <div class="row">
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Name:</strong></label>
+                        <input type="text" class="form-control" placeholder="Search Name Here" id="searchName" style="background-color:white">
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Email:</strong></label>
+                        <input type="text" class="form-control" id="searchEmail" style="background-color:white" placeholder="Search User Email Here">
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                        <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group text-right">
+                        <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="panel p-20 m-10">
+
+    <div class="row">
+        @if (ViewBag.category == 2)
+        {
+            <center><u><h3>Admin List</h3></u></center>
+        }
+        else if( ViewBag.category ==3)
+        {
+            <center><u><h3>Study Members List</h3></u></center>
+        }
+        else if( ViewBag.category ==5)
+        {
+            <center><u><h3>Clinical Research Associates List</h3></u></center>
+        }
+        else
+        {
+            <center><u><h3>Auditors List</h3></u></center>
+        }
+    </div>
+
+    <div class="row">
+        <div class="col-md-8"></div>
+        <div class="col-md-2 pull-right btn-block">
+            <a href="@Url.Action("AddUser","Admin", new{ cat= @ViewBag.category})" class="btn btn-primary m-5 pull-right">Add New</a>
+        </div>
+    </div>
+
+
+    <input type="hidden" id="way" value="@ViewBag.Way" />
+
+
+    <div class="table-responsive">
+        <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+            <thead class="bg-indigo-800">
+                <tr>
+                    <th class="text-bold" hidden>...</th>
+                    <th class="text-bold text-center" style="min-width:180px;">
+                        First Name
+                    </th>
+                    <th class="text-bold text-center" style="min-width:180px;">
+                        Last Name
+                    </th>
+                    <th class="text-bold text-center" style="min-width:210px;">
+                        Email
+                    </th>
+                    <th class="text-bold text-center" style="min-width:180px;">
+                       Organization
+                    </th>
+                    
+                    <th class="text-bold text-center" style="min-width:70px">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+
+<script>
+
+    var way = $('#way').val();
+
+    loadTable();
+
+    function loadTable(Name, email)
+    {
+        $('#userTable').DataTable(
+        {
+            "ajax":
+            {
+                "url": '@Url.Action("GetUserDataTableList", "Ajax")',
+                "type": "POST",
+                "datatype": "json",
+                "data": {
+                    Name: Name,
+                    email: email,
+                    category: @ViewBag.category
+                }
+            },
+            'columns':
+            [
+                { "data": "hidden", "name": "0" },
+                { "data": "firstName", "name": "FirstName" },
+                { "data": "lastName", "name": "LastName" },
+                { "data": "email", "name": "Email" },
+                { "data": "Action", "name": "0" },
+            ],
+            'columnDefs':
+            [
+                {
+                    "targets": 0,
+                    "visible": false,
+                    "searchable": false,
+                    "render": function (data, type, full, meta) {
+                        return null;
+                    }
+                },
+                {
+                    "targets": 1,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.firstName ;
+                    }
+                },
+                {
+                    "targets": 2,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.lastName;
+                    }
+                },
+                {
+                    "targets": 3,
+                    'className': '',
+                    "render": function (data, type, full, meta) {
+                        return full.email;
+                    }
+                },
+                {
+                    "targets": 4,
+                    'className': '',
+                    "render": function (data, type, full, meta) {
+                        return full.organization;
+                    }
+                },
+                {
+                    "targets": 5,
+                    'className': '',
+                    'sortable': false,
+                    "render": function (data, type, full, meta)
+                    {
+                        var x = '';
+                        var y='<ul class="dropdown-menu dropdown-menu-right" style="min-width:152px;padding-left:5px !important;">';
+                       // var viewprof= '<a class="btn btn-sm bg-primary fa fa-eye" href="../Admin/TakeSS?Email='+full.email+'&Pass='+full.password+'" title="View User Profile"></a>'
+                        if (full.isActive == 3) {
+                            x = '<button class="btn btn-sm bg-primary fa fa-solid fa-check mr-5" style="padding: 11px 15px;" onclick="AccountActivate(' + full.id + ')" title="Activate Account" ></button>';
+                        }
+                        else {
+                            if (full.isActive == 2) {
+                                x = '<button class="btn btn-sm bg-primary icon-stats-bars" onclick="PendingApproval(' + full.id + ')" title="Pending Approval"></button>';
+                               
+                            }
+                            else {
+                               x='';
+                               y='<ul class="dropdown-menu dropdown-menu-right" style="min-width:101px;padding-left:5px !important;">'
+                            }
+                        }
+                        return '<ul class="icons-list"> ' +
+                            '<li class="dropdown" >' +
+                            '			<a href="#" class="dropdown-toggle" data-toggle="dropdown">' +
+                            '				<i class="icon-menu9"></i>' +
+                            '			</a>' +
+                                            y +
+                            '				<li>' +
+                            '                   <button class="btn btn-sm bg-info icon-pencil" onclick="updateFunction(' + full.id + ')" title="Edit"></button>' +
+                            '                   <button class="btn btn-sm bg-danger icon-bin mr-5" onclick="deleteFunction(' + full.id + ')" title="Delete"></button>' +
+                                                x +
+                            '               </li>' +
+                            '			</ul>' +
+                            '		</li >' +
+                            '	</ul >';
+                    }
+                },
+            ],
+            "serverSide": "true",
+            "processing": "true",
+            "language":
+            {
+                "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                "search": "<span>Search :</span> _INPUT_",
+                "searchPlaceholder": "Filter Data",
+                "lengthMenu": "<span>Show :</span> _MENU_",
+                "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+            }
+        });
+    }
+
+
+    function searchTable()
+    {
+        var name = $('#searchName').val();
+        var email = $('#searchEmail').val();
+
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+
+        loadTable(name, email);
+    }
+
+    function clearSearch()
+    {
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+
+        $('#searchName').val("");
+        $('#searchEmail').val("");
+
+        loadTable();
+    }
+
+
+    function updateFunction(id)
+    {
+        $('#updEmailErrMsg').text("");
+        $('#updSubBtn').attr('disabled', false);
+
+        $("#loadImg").show();
+
+        $.ajax({
+            type: 'POST',
+            url: "../Ajax/GetUserById",
+            dataType: "json",
+            data: {
+                id: id
+            },
+            success: function (response)
+            {
+                if (response == 0) {
+                    alert("Record not found, Please reload the page.");
+                }
+
+                $("#updId").val(response.id);
+                $("#upd_Role").val(response.role);
+                $("#upd_status").val(response.status);
+
+                $("#updFName").val(response.firstName);
+                $("#updLName").val(response.lastName);
+                $("#updEmail").val(response.email);
+                //$("#updContact").val(response.contact);
+                $("#updPassword").val(response.password);
+                $("[name='OrganizationId']").val(response.organizationId);
+
+                if (response.role == 1 || response.role == 2) {
+                    $("#studassigned").remove();
+                }
+                else {
+
+                    var studyIds = response.studyIds.split(",");
+
+                    //$.each(studyIds, function(i, item) {
+
+                    //    $("#studiesassigned option").find("option[value="+item+"]").prop("selected", "selected");                    
+
+                    //});
+                    $("#studassigned").prop("hidden", false);
+                    $(".select2-selection__rendered").html("");
+                    $("#studiesassigned option").each(function() {
+                        var opt = $(this);
+
+                        if (studyIds.includes(opt.val())) {
+                            var spanSelect = `<li class="select2-selection__choice" title="${opt.html()}"><span class="select2-selection__choice__remove" role="presentation">×</span>${opt.html()}</li>`;
+                            opt.attr("selected", "selected");
+                            $(".select2-selection--multiple").find(".select2-selection__rendered").append(spanSelect);
+                        }
+                    });
+                }
+                //$("#updGender").val(response.gender);
+                //$("#updCountry").val(response.country);
+                //$("#updCity").val(response.city);
+                //$("#updOrganization").val(response.organization);
+                //$("#updWebsite").val(response.website);
+                //$("#updDescription").val(response.description);
+                //$("#updZipCode").val(response.zipCode);
+
+
+                $("#loadImg").hide();
+                $("#updateModal").modal('show');
+            },
+            error: function ()
+            {
+                $("#loadImg").hide();
+
+                alert("ajax Failed");
+            }
+        });
+
+    }
+
+    function validateEmail(email)
+    {
+        var id = $('#updId').val();
+        if (email != "" && id != "")
+        {
+            $.ajax({
+                type: 'POST',
+                url: "../Ajax/ValidateEmail",
+                dataType: "json",
+                data: {
+                    email: email, id: id
+                },
+                success: function (response)
+                {
+                    if (response == true)
+                    {
+                        $('#updEmailErrMsg').text("");
+                        $('#updSubBtn').attr('disabled', false);
+                    }
+                    else {
+                        $('#updEmailErrMsg').text("Duplicate Email");
+                        $('#updSubBtn').attr('disabled', true);
+                    }
+                },
+                error: function ()
+                {
+                    $('#updEmailErrMsg').text("");
+                    $('#updSubBtn').attr('disabled', false);
+
+                    alert("Ajax failed");
+                }
+            });
+        }
+
+    }
+
+
+    function deleteFunction(id) {
+        $('#confirmModalHeading').text('Warning!');
+        $('#confirmModalHeader').removeClass('bg-success');
+        $('#confirmModalHeader').addClass('bg-danger');
+        $('#confirmModalText').empty();
+                $('#confirmModalText').append('Do you really want to delete this Record?');
+
+
+        $("#confirmModalForm").attr("action", "../Admin/DeleteUser?id=" + id + "&way=@ViewBag.Way");
+
+        $('#confirmModal').modal('show');
+    }
+
+</script>
+
+<script>
+    $("#toggle").change(function () {
+
+        // Check the checkbox state
+        if ($(this).is(':checked')) {
+            // Changing type attribute
+            $("#updPassword").attr("type", "text");
+
+            // Change the Text
+            $("#toggleText").text("Hide");
+        } else {
+            // Changing type attribute
+            $("#updPassword").attr("type", "password");
+
+            // Change the Text
+            $("#toggleText").text("Show");
+        }
+
+    });
+</script>
+
+<script>
+    //Used to handle Sidebar links Activeness
+    $('#manageUserTab2').addClass('active');
+    GetAllOrganization();
+
+      $.ajax({
+                    type: 'GET',
+                    url: "../Ajax/GetAllStudies",
+                    dataType: "json",
+                    success: function (response) {
+             
+                     
+                        
+                        for (var i = 0; i < response.length; i++) { 
+                            $('#studiesassigned').append($('<option>', { 
+                                value: response[i].id,
+                                text : response[i].protocol_Title 
+                            }));
+                           
+                        }
+                       
+                           
+                        
+                    },
+                    error: function () {
+                        alert("Ajax failed");
+                    }
+                });
+
+
+
+                function GetAllOrganization() {
+           
+                $.ajax({
+                    type: 'GET',
+                    url: "../Ajax/GetAllOrganizations",
+                    dataType: "json",
+                    success: function (response) {
+                      
+                     
+                        for (var i = 0; i < response.length; i++) { 
+                            $('#organizations').append($('<option>', { 
+                                value: response[i].id,
+                                text : response[i].name 
+                            }));
+                        }
+                        
+                    },
+                    error: function () {
+                        alert("Ajax failed");
+                    }
+                });
+        }
+</script>
+

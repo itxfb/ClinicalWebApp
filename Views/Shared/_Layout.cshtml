@@ -1,0 +1,756 @@
+﻿@using ClinicalWebApplication.Models
+@using Microsoft.Data.SqlClient;
+@inject SqlConnection de
+@using ClinicalWebApplication.BL
+@using System.Security.Claims;
+@{
+    var Userid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+    var CurrentUserRecord = new UserBL().GetActiveUserById(Convert.ToInt32(Userid), de);
+    var CurrentOrganization = new OrganizationBL().GetActiveOrganizationById(CurrentUserRecord.OrganizationId, de);
+    User loggedinUser = CurrentUserRecord;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title - Open Bio</title>
+    @RenderSection("head", required: false)
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" type="image/x-icon" href="~/images/logo.png">
+
+     <!-- font-awesome -->
+    
+
+    <!-- Global stylesheets -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/icons/icomoon/styles.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/core.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/components.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/colors.css" rel="stylesheet" type="text/css">
+    <!-- /global stylesheets -->
+    <!-- Core JS files -->
+    <script type="text/javascript" src="~/assets/js/plugins/loaders/pace.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/core/libraries/jquery.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/core/libraries/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/loaders/blockui.min.js"></script>
+    <!-- /core JS files -->
+    <!-- libraries for tabbed input form -->
+    <script type="text/javascript" src="~/assets/js/plugins/forms/wizards/stepy.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/core/libraries/jasny_bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+    <!-- /libraries for tabbed input form -->
+    <!-- Theme JS files -->
+    <script type="text/javascript" src="~/assets/js/plugins/visualization/d3/d3.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/visualization/d3/d3_tooltip.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/forms/styling/switchery.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/forms/styling/switch.min.js"></script>
+
+    <script type="text/javascript" src="~/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/pickers/daterangepicker.js"></script>
+
+
+
+    <script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/tables/datatables/extensions/row_reorder.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/tables/datatables/extensions/responsive.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/tables/datatables/extensions/pdfmake/vfs_fonts.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/tables/datatables/extensions/buttons.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/pages/datatables_extension_buttons_html5.js"></script>
+    <script type="text/javascript" src="~/assets/js/pages/datatables_extension_row_reorder.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/notifications/pnotify.min.js"></script>
+
+    <script type="text/javascript" src="~/assets/js/core/app.js"></script>
+
+    @*<script type="text/javascript" src="~/assets/js/pages/components_notifications_pnotify.js"></script>*@
+    <script type="text/javascript" src="~/assets/js/plugins/notifications/CustomePnotify.js"></script>
+
+
+    @*<script type="text/javascript" src="~/assets/js/pages/form_checkboxes_radios.js"></script>*@
+
+    <!-- libraries for tabbed input form -->
+    <script type="text/javascript" src="~/assets/js/pages/wizard_stepy.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/ui/ripple.min.js"></script>
+    <!-- /libraries for tabbed input form -->
+
+    <script type="text/javascript" src="~/assets/js/pages/dashboard.js"></script>
+
+
+    <!-- /theme JS files -->
+    
+    <script src="~/FrontAssets/js/countrypicker.js"></script>
+
+    <script src="~/FrontAssets/js/tagsinput.js"></script>
+
+    <script src="~/FrontAssets/vendor/select2/js/select2.min.js"></script>
+    <!-- Custom -->
+    <script src="~/FrontAssets/js/custom.js"></script>
+    <!-- /theme JS files -->
+    <!-- /Custom add libraries -->
+
+    <link href="~/assets/css/icons/fontawesome/styles.min.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/icons/fontawesome/fonts/fontawesome-webfont.svg" rel="stylesheet" type="text/css">
+
+    <!-- Theme JS files -->
+	<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+	<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+
+	<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+	<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+    <!-- font-awesome links -->
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.2.0/css/all.css">
+	<!-- /theme JS files -->
+
+    <style>
+        textarea {
+            resize: vertical;
+        }
+
+        @@media (max-width: 768px) {
+            .heading-elements:not(.not-collapsible), .breadcrumb-elements:not(.not-collapsible) {
+                display: block;
+                float: right;
+                position: absolute !important;
+                margin-top: -11px;
+            }
+        }
+    </style>
+
+</head>
+<body class="bg-white">
+
+    <input type="hidden" id="viewbagMessage" value="@ViewBag.Message">
+    <input type="hidden" id="viewbagColor" value="@ViewBag.Color">
+
+    <img id="loadImg" src='../assets/images/loading.gif' width='150' style="position:fixed;margin-left:45%; margin-top:20%; z-index:111; display:none" />
+
+    <img id="loadImg2" src='../assets/images/book.gif' width='150' style="position:fixed; margin-top:20%; z-index:111; display:none" />
+
+
+
+    <!--Modal-->
+    <div class="modal fade" id="confirmModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header text-center" id="confirmModalHeader">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title" id="confirmModalHeading">Warning</h3>
+                </div>
+                <div class="modal-body p-5">
+                    <h6 class="text-semibold" id="confirmModalText" style="font-size:17px">
+                        
+                    </h6>
+                </div>
+                <div class="modal-footer border-top-1 border-top-grey-300 pt-10">
+                    <form method="post" id="confirmModalForm">
+                        <button class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-danger" type="submit" id="confirmModalId">Proceed</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Main navbar -->
+    <div class="navbar navbar-inverse bg-indigo-600">
+        <div class="navbar-header">
+         @*   <img src="~/assets/images/zymah-logo.png" alt="Logo" class="ml-20" width="150" height="60">*@
+              <a class="navbar-brand" href="@Url.Action("Index","Home")"><span class="text-success">Open</span>-Bio</a>
+            <ul class="nav navbar-nav visible-xs-block">
+                <li><a data-toggle="collapse" data-target="#navbar-mobile"><i class="icon-tree5"></i></a></li>
+                <li><a class="sidebar-mobile-main-toggle"><i class="icon-paragraph-justify3"></i></a></li>
+            </ul>
+
+        </div>
+
+
+        <div class="navbar-collapse collapse" id="navbar-mobile">
+            <ul class="nav navbar-nav">
+           
+            </ul>
+
+            <div class="navbar-right">
+
+                <ul class="nav navbar-nav navbar-right">
+                    @if (loggedinUser != null)
+                    {
+                        <!--This is Manage profile Segment-->
+                        <li class="dropdown dropdown-user">
+                            <a href="@Url.Action("Logout", "Auth")" class="dropdown-toggle">
+                                <i class="icon-switch2" style="margin-right:5px;"></i><span>Logout</span>
+                            </a>
+
+
+                        </li>
+                    <!--This is Manage profile Segment-->
+                    }
+
+                </ul>
+
+
+               
+            </div>
+        </div>
+    </div>
+    <!-- /main navbar -->
+
+
+
+
+    <div class="page-container bg-white">
+
+
+        <!-- Main sidebar -->
+        <div class="sidebar sidebar-main sidebar-default">
+            @if (loggedinUser != null)
+            {
+                <div class="sidebar-content">
+
+                    <!-- User menu -->
+                    <div class="sidebar-user-material">
+                        <div class="category-content">
+
+                            <div class="sidebar-user-material-content">
+                                @*<img class="img-fluid" src="~/assets1/images/logo.png"/>*@
+                                @if (CurrentOrganization != null)
+                                {
+                                    <h3 style="color:white;">@CurrentOrganization.Name</h3>
+                                }
+                                <br />
+                            <span class="text-size-small">@loggedinUser.FirstName @loggedinUser.LastName</span>
+                        </div>
+                        
+                        <div class="sidebar-user-material-menu">
+                            <a href="#user-nav" data-toggle="collapse"><span>My Account</span> <i class="caret"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="navigation-wrapper collapse" id="user-nav">
+                        <ul class="navigation">
+                            <li><a href="@Url.Action("UpdateProfile", "Auth")"><i class="icon-profile"></i> <span>Update Profile</span></a></li>
+                            <li><a href="@Url.Action("UpdatePassword", "Auth")"><i class="icon-lock2"></i> <span>Update Password</span></a></li>
+                            <li><a href="@Url.Action("Logout", "Auth")"><i class="icon-switch2"></i> <span>Logout</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- /user menu -->
+
+                <div class="sidebar-category sidebar-category-visible">
+                    <div class="category-content no-padding">
+                        <ul class="navigation navigation-main navigation-accordion">
+
+                            @if (loggedinUser.Role == 1 || loggedinUser.Role==2)
+                            {
+                                <li class="navigation-header"><span>Main</span> <i class="icon-menu" title="Main pages"></i></li>
+                                <li id="adminIndex"><a href="@Url.Action("Index", "Admin")"><i class="icon-home4"></i> <span>Dashboard</span></a></li>
+                                 @*manage studies*@
+                               
+                                 @if (loggedinUser.Role == 1)
+                                    {
+                                        <li>
+                                            <a href="#"><i class="fa fa-sitemap"></i> <span>Manage Organizations</span></a>
+                                            <ul>
+                                                <li><a  href="@Url.Action("AddOrganization", "Admin", new{ cat=4})">Add New Organization</a></li>
+                                                <li><a  href="@Url.Action("ViewOrganizations", "Admin", new { category = 4})">View Organizations</a></li>
+
+                                            </ul>
+                                        </li>
+                                    }
+                                 
+                                 <li>
+                                    <a href="#"><i class="fas fa-book-reader"></i> <span>Manage Studies</span></a>
+                                    <ul>
+                                    
+                                        <li ><a  href="@Url.Action("AddStudy", "Admin")">Add New Study</a></li>
+                                
+                                        <li ><a  href="@Url.Action("ViewStudies", "Admin")">View All Studies</a></li> 
+
+                                        </ul>
+                                    </li>
+
+                                         <li>
+                                    <a href="#"><i class="fas fa-stream"></i><span>Manage Investigator Site</span></a>
+                                    <ul>
+                                        
+                                        <li ><a  href="@Url.Action("AddInvestigatorSite", "Studies")">Add Investigator Site</a></li>
+
+                                        
+                                              <li ><a  href="@Url.Action("ViewInvestigatorSites", "Studies")">View Investigator Sites</a></li>
+
+                                                <li ><a  href="@Url.Action("AddStaffInvestigator", "Studies")">Add Investigator Site Staff</a></li>
+
+                                                    <li><a href="@Url.Action("ViewHighRiskInvestigatorSite", "Studies")">View High Risk Investigator Site</a></li>
+
+
+                                              </ul>
+                                    </li>
+                                               @*Manage CRA*@
+                                            <li>
+                                                <a href="#" ><i class="fa fa-user"></i><span>Manage CRA</span></a>
+                                                <ul>
+                                                    <li><a href="@Url.Action("AddUser", "Admin",new{ cat=5})">Add New CRA</a></li>
+
+
+                                                    <li><a href="@Url.Action("ViewUser", "Admin", new { category = 5})">View CRA</a></li>
+
+                                                </ul>
+
+
+                                            </li>
+                                            <li>
+                                    <a href="#"><i class="fas fa-vector-square"></i> <span>Manage Protocol Deviation</span></a>
+                                    <ul>
+
+                                        <li ><a  href="@Url.Action("AddProtocolDeviations", "Studies")">Add Protocol Deviation</a></li>
+
+                                         <li ><a  href="@Url.Action("ViewProtocolDeviations", "Studies")">View Protocol Deviations</a></li>
+                                                
+                                           
+                                         </ul>
+
+
+                                            </li>
+
+                                            @*Manage Monitoring visit*@
+                                            <li>
+                                                <a href="#" ><i class="fab fa-trello"></i><span>Manage Monitoring Visit</span></a>
+                                                <ul>
+                                            <li><a href="@Url.Action("AddMonitoringVisit", "Studies")">Add New Monitoring Visit</a></li>
+
+                                            <li><a href="@Url.Action("ViewMonitoringVisit", "Studies")">View Monitoring Visit</a></li>
+
+                                            <li><a href="@Url.Action("CreateConfirmationLetter", "Studies")">Send Confirmation Letter</a></li>
+
+                                            <li><a href="@Url.Action("CreateFollowUpLetter", "Studies")">Send Follow Up Letter</a></li>
+                                                    
+
+                                                    @*<li><a href="@Url.Action("ViewUser", "Admin", new { category = 5})">View CRA</a></li>*@
+
+                                                </ul>
+
+
+                                            </li>
+
+                                            <li>
+                                                <a href="#" ><i class="fas fa-window-restore"></i><span>Manage General Finding</span></a>
+                                                <ul>
+                                                    
+
+                                                    
+                                                    <li><a href="@Url.Action("AddGeneralFinding", "Studies")">Add New General Finding</a></li>
+                                                    @*<li><a href="@Url.Action("ViewGeneralFindings", "Studies")">View General Finding</a></li>*@
+
+
+                                                    @*<li><a href="@Url.Action("ViewUser", "Admin", new { category = 5})">View CRA</a></li>*@
+
+                                                </ul>
+
+
+                                            </li>
+
+                                          
+
+
+
+                                    @*</ul>
+                                    </li>*@
+                                    
+                                    @*<li>
+                                    <a href="#"><i class="fa fa-users"></i> <span>Manage Users</span></a>
+                                    <ul>*@
+                                        @if (loggedinUser.Role == 1)
+                                        {
+                                            <li>
+                                            <a href="#"><i class="fas fa-user-cog"></i><span>Manage Admins</span></a>
+                                            <ul>
+                                           <li ><a  href="@Url.Action("AddUser", "Admin",new{ cat=2})">Add New Admin</a></li>
+                                           <li ><a  href="@Url.Action("ViewUser", "Admin", new { category = 2})">View Admins</a></li>
+
+                                            </ul>
+
+
+                                            </li>
+                                         
+                                           
+
+                                        }
+                                        @*Manage studuy member*@
+                                            <li>
+                                                <a href="#"><i class="fas fa-portrait"></i><span>Manage Study Members</span></a>
+                                                <ul>
+                                                    <li><a href="@Url.Action("AddUser", "Admin",new{ cat=3})">Add New Study Member</a></li>
+                                                    <li><a href="@Url.Action("ViewUser", "Admin", new { category = 3})">View Study Members</a></li>
+
+
+                                                </ul>
+
+
+                                            </li>
+                                            @*Manage Auditors*@
+                                            <li>
+                                                <a href="#"><i class="fa fa-users"></i><span>Manage Auditors</span></a>
+                                                <ul>
+                                                    <li><a href="@Url.Action("AddUser", "Admin",new{ cat=4})">Add New Auditor</a></li>
+                                                    <li><a href="@Url.Action("ViewUser", "Admin", new { category = 4})">View Auditors</a></li>
+
+
+                                                </ul>
+
+
+                                            </li>
+
+                                          
+                                     <li>
+                                      <a href="#"><i class="fas fa-tasks"></i><span>Manage Actions</span></a>
+                                      <ul>
+                                    
+                                        <li ><a  href="@Url.Action("AddActions", "Studies")">Add New Action</a></li>
+                                
+                                        <li ><a  href="@Url.Action("viewActions", "Studies")">View All Actions</a></li> 
+
+                                        </ul>
+                                    </li>
+                                        
+                                     <li>
+                                      <a href="#"><i class="fas fa-clone"></i><span>Manage Decisions</span></a>
+                                      <ul>
+
+                                        <li ><a  href="@Url.Action("AddDecision", "Studies")">Add New Decision</a></li>
+
+                                        <li ><a  href="@Url.Action("viewDecisions", "Studies")">View All Decisions</a></li>
+
+                                         </ul>
+                                    </li>
+
+                                    <li>
+                                      <a href="#"><i class="fa fa-info-circle"></i><span>Manage Informatives</span></a>
+                                      <ul>
+                                        <li ><a  href="@Url.Action("AddInformativ", "Studies")">Add New Informative</a></li>
+
+                                        <li ><a  href="@Url.Action("viewInformative", "Studies")">View Informatives</a></li>
+
+                                    </ul>
+                                    </li>
+
+                                }
+
+                                else
+                                {
+
+                                    <li class="navigation-header"><span>Main</span> <i class="icon-menu" title="Main pages"></i></li>
+                                    @if (loggedinUser.Role == 3)
+                                    {
+                                        <li id="adminIndex"><a href="@Url.Action("SMDashboard", "Admin")"><i class="icon-home4"></i> <span>All Studies</span></a></li>
+                                        <li id="adminIndex"><a href="@Url.Action("StudyDashboard", "Admin", new { id= @ViewBag.StudyId })"><i class="icon-home4"></i> <span>Study Dashboard</span></a></li>
+                                    
+                                    
+                                    }
+                                   @* <li>
+                                        <a href="#"><i class="fas fa-book-reader"></i><span>Manage Studies</span></a>
+                                        <ul>*@
+                                            @if (loggedinUser.Role == 3)
+                                            {
+                                                <li>
+                                                    <a href="#"><i class="fas fa-book-reader"></i><span>Manage Studies</span></a>
+                                                    <ul>
+                                                <li><a  href="@Url.Action("ViewStudies", "Admin", new { id= @ViewBag.StudyId})">View Study Information</a></li>
+
+
+
+                                                    </ul>
+                                                </li>
+                                                 <li>
+                                                    <a href="#"><i class="fas fa-stream"></i><span>Manage Investigator Site</span></a>
+                                                    <ul>
+
+                                                <li ><a  href="@Url.Action("AddInvestigatorSite", "Studies", new {id = @ViewBag.StudyId} )">Add Investigator Site</a></li>
+                                                <li ><a  href="@Url.Action("ViewInvestigatorSites", "Studies", new {id = @ViewBag.StudyId} )">View Investigator Sites</a></li>
+                                                <li ><a  href="@Url.Action("AddStaffInvestigator", "Studies", new {id = @ViewBag.StudyId} )">Add Staff Investigator Site</a></li>
+
+                                                    </ul>
+                                                </li>
+
+                                                 <li>
+                                                    <a href="#"><i class="fas fa-vector-square"></i><span>Manage Protocol Deviation</span></a>
+                                                    <ul>
+
+                                                <li ><a  href="@Url.Action("AddProtocolDeviations", "Studies", new {id = @ViewBag.StudyId} )">Add Protocol Deviation</a></li>
+                                                <li ><a  href="@Url.Action("ViewProtocolDeviations", "Studies", new {id = @ViewBag.StudyId} )">View Protocol Deviations</a></li>
+
+                                                    </ul>
+                                                </li>
+                                                
+                                                  <li>
+                                                <a href="#" ><i class="fab fa-trello"></i><span>Manage Monitoring Visit</span></a>
+                                                <ul>
+
+                                                    <li><a href="@Url.Action("ViewMonitoringVisit", "Studies")">View Monitoring Visit</a></li>
+
+                                                    
+
+                                                    @*<li><a href="@Url.Action("ViewUser", "Admin", new { category = 5})">View CRA</a></li>*@
+
+                                                </ul>
+
+
+                                            </li>
+
+                                            @*<li>
+                                                <a href="#" ><i class="fa fa-user"></i><span>Manage General Finding</span></a>
+                                                <ul>
+                                                    
+
+                                                    
+                                                    <li><a href="@Url.Action("ViewGeneralFindings", "Studies")">View General Finding</a></li>
+
+
+
+                                                </ul>
+
+
+                                            </li>*@
+
+                                                <li>
+                                      <a href="#"><i class="fas fa-tasks"></i><span>Manage Actions</span></a>
+                                      <ul>
+                                    
+                                        <li ><a  href="@Url.Action("AddActions", "Studies" , new {id = @ViewBag.StudyId} )">Add New Action</a></li>
+                                
+                                        <li ><a  href="@Url.Action("viewActions", "Studies" , new {id = @ViewBag.StudyId})">View All Actions</a></li> 
+
+                                        </ul>
+                                    </li>
+                                        
+                                     <li>
+                                      <a href="#"><i class="fas fa-clone"></i><span>Manage Decisions</span></a>
+                                      <ul>
+
+                                        <li ><a  href="@Url.Action("AddDecision", "Studies" , new {id = @ViewBag.StudyId})">Add New Decision</a></li>
+
+                                        <li ><a  href="@Url.Action("viewDecisions", "Studies" , new {id = @ViewBag.StudyId})">View All Decisions</a></li>
+
+                                         </ul>
+                                    </li>
+
+                                    <li>
+                                      <a href="#"><i class="fa fa-info-circle"></i><span>Manage Informatives</span></a>
+                                      <ul>
+                                        <li ><a  href="@Url.Action("AddInformativ", "Studies" , new {id = @ViewBag.StudyId})">Add New Informative</a></li>
+
+                                        <li ><a  href="@Url.Action("viewInformative", "Studies" , new {id = @ViewBag.StudyId})">View Informatives</a></li>
+
+                                    </ul>
+                                    </li>
+
+
+                                            }
+                                            
+                                             @if(loggedinUser.Role==4)
+                                            {
+                                                <li>
+                                                    <a href="#"><i class="fas fa-book-reader"></i><span>Manage Studies</span></a>
+                                                    <ul>
+                                                <li><a  href="@Url.Action("ViewStudies", "Admin", new { id= @ViewBag.StudyId})">View Study Information</a></li>
+
+
+
+                                                    </ul>
+                                                </li>
+
+                                               <li>
+                                                    <a href="#"><i class="fa fa-tasks"></i><span>Manage Investigator Site</span></a>
+                                                    <ul>
+
+                                                <li ><a  href="@Url.Action("ViewInvestigatorSites", "Studies", new {id = @ViewBag.StudyId} )">View Investigator Sites</a></li>
+
+
+                                                    </ul>
+                                                </li>
+
+                                                 <li>
+                                                    <a href="#"><i class="fas fa-book-reader"></i><span>Manage Protocol Deviation</span></a>
+                                                    <ul>
+
+                                                <li ><a  href="@Url.Action("ViewProtocolDeviations", "Studies", new {id = @ViewBag.StudyId} )">View Protocol Deviations</a></li>
+
+                                                    </ul>
+                                                </li>
+                                            }
+                                            @if(loggedinUser.Role==5)
+                                            {
+                                                <li>
+                                                    <a href="#"><i class="fas fa-book-reader"></i><span>Manage Protocol Deviation</span></a>
+                                                    <ul>
+
+                                                <li ><a  href="@Url.Action("ViewProtocolDeviations", "Studies", new {id = @ViewBag.StudyId} )">View Protocol Deviations</a></li>
+
+                                                    </ul>
+                                                </li>
+
+                                                @*Monitoring visit*@ 
+
+                                                 @*Manage Monitoring visit*@
+                                            <li>
+                                                <a href="#" ><i class="fab fa-trello"></i><span>Manage Monitoring Visit</span></a>
+                                                <ul>
+                                                    <li><a href="@Url.Action("AddMonitoringVisit", "Studies")">Add New Monitoring Visit</a></li>
+
+                                                    <li><a href="@Url.Action("ViewMonitoringVisit", "Studies")">View Monitoring Visit</a></li>
+
+                                                     <li><a href="@Url.Action("CreateConfirmationLetter", "Studies")">Send Confirmation Letter</a></li>
+
+                                            <li><a href="@Url.Action("CreateFollowUpLetter", "Studies")">Send Follow Up Letter</a></li>
+
+                                                    @*<li><a href="@Url.Action("ViewUser", "Admin", new { category = 5})">View CRA</a></li>*@
+
+                                                </ul>
+
+
+                                            </li>
+
+                                            <li>
+                                                <a href="#" ><i class="fa fa-user"></i><span>Manage General Finding</span></a>
+                                                <ul>
+                                                    
+
+                                                    
+                                                    <li><a href="@Url.Action("AddGeneralFinding", "Studies")">Add New General Finding</a></li>
+                                                    @*<li><a href="@Url.Action("ViewGeneralFindings", "Studies")">View General Finding</a></li>*@
+
+
+
+                                                </ul>
+
+
+                                            </li>
+
+                                             <li>
+                                                <a href="#" ><i class="fas fa-window-restore"></i><span>Manage Investigator Sites</span></a>
+                                                <ul>
+                                                    
+
+                                                    
+                                                 <li><a href="@Url.Action("ViewHighRiskInvestigatorSite", "Studies")">View High Risk Investigator Site</a></li>
+
+                                                    @*<li><a href="@Url.Action("ViewGeneralFindings", "Studies")">View General Finding</a></li>*@
+
+
+                                                    @*<li><a href="@Url.Action("ViewUser", "Admin", new { category = 5})">View CRA</a></li>*@
+
+                                                </ul>
+
+
+                                            </li>
+
+                                            }
+                                        
+                                        
+                                    
+
+                                     
+                                    @*<li id="userTab1"><a href="@Url.Action("Index", "Home")"><i class="icon-users"></i> <span>View Users</span></a></li>*@
+                            }
+
+
+
+                        </ul>
+                    </div>
+
+                </div>
+                <!--/main navigation-->
+
+            </div>
+            }
+        </div>
+        <!-- /main sidebar -->
+
+        <div class="bg-white">
+            @RenderBody()
+        </div>
+    </div>
+  
+    <script>
+
+        //show hide Passwords
+        function ShowPasswords(id) {
+            if (id == 1) {
+                var x = document.getElementById("password");
+                var ShowPassword = document.getElementById("SignupShowPassword");
+                var HidePassword = document.getElementById("SignupHidePassword");
+                if (x.type === "password") {
+                    x.type = "text";
+                    ShowPassword.style.display = "none";
+                    HidePassword.style.display = "block";
+                } else {
+                    x.type = "password";
+                    ShowPassword.style.display = "block";
+                    HidePassword.style.display = "none";
+                }
+            }
+            if (id == 2) {
+                var y = document.getElementById("ConfirmPassword");
+                var ShowPassword = document.getElementById("LoginShowPassword");
+                var HidePassword = document.getElementById("LoginHidePassword");
+                if (y.type === "password") {
+                    y.type = "text";
+                    ShowPassword.style.display = "none";
+                    HidePassword.style.display = "block";
+                } else {
+                    y.type = "password";
+                    ShowPassword.style.display = "block";
+                    HidePassword.style.display = "none";
+                }
+            }
+        }
+
+        //function Used to hide automatically alert message after 4 seconds
+        $("#alertMsg").fadeTo(3000, 500).slideUp(400, function () {
+            $("#alertMsg").slideUp(500);
+        });
+          function limitText(limitField, limitNum) {
+    if (limitField.value.length > limitNum) {
+        limitField.value = limitField.value.substring(0, limitNum);
+    }
+}
+    </script>
+     
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+
+
+
+@*<script>
+    //Used to handle Sidebar links Activeness
+    $('#manageUserTab1').click()
+    {
+    $('#manageUserTab1').addClass('active');
+     $('#manageUserTab2').attr('class',"");
+      $('#manageUserTab3').attr('class',"");
+    }
+
+     //Used to handle Sidebar links Activeness
+    $('#manageUserTab2').click()
+    {
+    $('#manageUserTab2').addClass('active');
+     $('#manageUserTab1').attr('class',"");
+      $('#manageUserTab3').attr('class',"");
+    }
+
+     //Used to handle Sidebar links Activeness
+    $('#manageUserTab1').click()
+    {
+    $('#manageUserTab3').addClass('active');
+     $('#manageUserTab2').attr('class',"");
+      $('#manageUserTab1').attr('class',"");
+    }
+</script>*@

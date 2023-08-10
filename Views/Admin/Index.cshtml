@@ -1,0 +1,164 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+  <div class="col-md-12 text-center m-10">
+        @if(ViewBag.Role == 1)
+        {
+            <h1 class="text-bold text-highlight"><u>Super Admin Dashboard</u></h1>
+        }
+        else if(ViewBag.Role == 2)
+        {
+            <h1 class="text-bold text-highlight"><u>Admin Dashboard</u></h1>
+        } 
+        
+        else if(ViewBag.Role == 3)
+        {
+            <h1 class="text-bold text-highlight"><u>Study Member Dashboard</u></h1>
+        }  
+        else if(ViewBag.Role == 4)
+        {
+            <h1 class="text-bold text-highlight"><u>Auditor Dashboard</u></h1>
+        }
+        else if(ViewBag.Role == 5)
+        {
+            <h1 class="text-bold text-highlight"><u>CRA Dashboard</u></h1>
+        }
+    </div>
+
+     @if (ViewBag.Role == 1)
+    {
+<div class="row text-center m-10">
+
+  
+
+   
+        <div class="col-md-4 col-md-offset-2">
+            <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+                <h3 class="text-semibold">Total Organizations</h3>
+                <h2 class="text-bold">@ViewBag.Organizations</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-md-offset-1">
+            <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Total Study Members</h3>
+            <h2 class="text-bold">@ViewBag.StudyMembers</h2>
+        </div>
+    </div>
+    
+   
+
+</div>
+}
+<div class="row text-center m-10 ">
+    @if(ViewBag.Role != 4 && ViewBag.Role != 5)
+    {
+         <div class="col-md-4 col-md-offset-2 mt-3 pt-5">
+        <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Total Admins</h3>
+            <h2 class="text-bold">@ViewBag.Admins</h2>
+        </div>
+        </div>
+    }
+    else if(ViewBag.Role == 5)
+    {
+         <div class="col-md-4 col-md-offset-2 mt-3 pt-5">
+        <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Total Protocol Deviations</h3>
+            <h2 class="text-bold">@ViewBag.protocoldeviations</h2>
+        </div>
+    </div>  
+    }
+
+    <div class="col-md-4 col-md-offset-1 mt-3 pt-5">
+        <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Total Studies</h3>
+            <h2 class="text-bold">@ViewBag.Studies</h2>
+        </div>
+    </div>
+</div>
+
+@if(ViewBag.Role == 5)
+{
+
+<div class="row text-center m-10 ">
+    <div class="col-md-4 col-md-offset-2 mt-3 pt-5">
+        <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Total Monitoring Visits</h3>
+            <h2 class="text-bold">@ViewBag.monitoringvisits</h2>
+        </div>
+    </div> 
+
+    <div class="col-md-4 col-md-offset-1 mt-3 pt-5">
+        <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Monitoring Visits In Month</h3>
+            <h2 class="text-bold">@ViewBag.monitoringvisitsthismonth</h2>
+        </div>
+    </div>
+
+
+
+    </div>
+
+    <div class="row text-center m-10 ">
+    <div class="col-md-4 col-md-offset-2 mt-3 pt-5">
+        <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Number Of Open Findings</h3>
+            <h2 class="text-bold">@ViewBag.NoofOpenFindings</h2>
+        </div>
+    </div> 
+
+    
+
+
+
+    </div>
+
+    
+}
+
+@if(ViewBag.Role == 1 || ViewBag.Role == 2  )
+{
+   <div class="row text-center m-10">
+
+        <div class="col-md-4 col-md-offset-2">
+            <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+                <h3 class="text-semibold">Total Actions</h3>
+                <h2 class="text-bold">@ViewBag.Actions</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-md-offset-1">
+            <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Total Decisions</h3>
+            <h2 class="text-bold">@ViewBag.Decisions</h2>
+        </div>
+    </div>
+    
+</div>
+
+<div class="row text-center m-10">
+
+        <div class="col-md-4 col-md-offset-2">
+            <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+                <h3 class="text-semibold">Total Informativs</h3>
+                <h2 class="text-bold">@ViewBag.Informativs</h2>
+            </div>
+        </div>
+
+         <div class="col-md-4 col-md-offset-1">
+        <div class="text-center text-white" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Number Of Open Findings</h3>
+            <h2 class="text-bold">@ViewBag.NoofOpenFindings</h2>
+        </div>
+    </div> 
+    
+</div>
+}
+<script>
+    //Used to handle Sidebar links Activeness
+    $('#adminIndex').addClass('active');
+
+</script>

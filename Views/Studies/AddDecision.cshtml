@@ -1,0 +1,283 @@
+﻿@using ClinicalWebApplication.Models
+@using Microsoft.Data.SqlClient;
+@inject SqlConnection de
+@using ClinicalWebApplication.BL
+@using System.Security.Claims;
+@{
+    ViewBag.Title = "Add Decisions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var Userid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+    var CurrentUserRecord = new UserBL().GetActiveUserById(Convert.ToInt32(Userid), de);
+
+}
+
+<div class="p-20">
+
+    <div class="row">
+        <form action="@Url.Action("PostAddDecision", "Studies")" method="post" enctype="multipart/form-data">
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-flat">
+                        <div class="panel-heading">
+
+                            <h2 class="panel-title text-center text-bold">Add Decision</h2>
+
+                        </div>
+
+                        <div class="panel-body">
+
+                            <legend class="text-bold text-uppercase"><span class="text-danger">*</span> Fields are mandatory to fill</legend>
+
+
+                            <div class="form-group">
+                                <label class="text-bold"> Decision Date <span class="text-danger">*</span></label>
+                                <input type="date"  class="form-control" id="dec_date" required name="Decisions_Date">
+                            </div>
+                            
+                            @if (ViewBag.Role == 1)
+                            {
+                                <div class="form-group">
+                                    <label class="text-bold">Select Organization<span class="text-danger">*</span></label>
+                                    <select id="Organization_Id" onchange="getorganizationstudies(this.value)" class="form-control" name="OrganizationId"  required>
+                                        <option>--select an option--</option>
+
+                                    </select>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" name="OrganizationId" value="@ViewBag.organizationid" />
+                            }
+
+                            @if (ViewBag.Role == 1 || ViewBag.Role == 2)
+                            {
+                                <div class="form-group">
+                                    <label class="text-bold">Select Study<span class="text-danger">*</span></label>
+                                    <select id="orgstudies" class="form-control" name="StudyId" placeholder="Select Study" required>
+
+                                    </select>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" name="StudyId" value="@ViewBag.StudyId" />
+                            }
+                            
+                            @*<div class="form-group">
+                       
+                           <label class="text-bold">Select Study<span class="text-danger">*</span></label>
+                            <select id="orgstudies"  class="form-control" required name="StudyId" >
+                                <option value=""> -- Select a Study -- </option>   
+
+                            </select>
+                            
+                        </div>*@
+                            <div class="form-group">
+                                <label class="text-bold"> Decision Description <span class="text-danger">*</span></label>
+                                <textarea  class="form-control" required name="Description" placeholder="Enter Decision Detail Here"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold"> Risk Impact <span class="text-danger">*</span></label>
+                                <select class="form-control" required name="Risk_Impact" placeholder="Enter Subject Status Here">
+                                    <option value="">--Select Risk Impact--</option>
+                                    <option>High</option>
+                                    <option>Medium</option>
+                                    <option>Low</option>
+                                    
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Upload your File<span class="text-danger">*</span></label>
+                                <input type="file" id="upload_file" title="Click to Upload your image or file type(doc,docx,jpeg,jpg,pdf,png). File Size Must be less then 2MB" onchange="loadfile(event)" accept=".doc,.docx,.jpeg,.jpg,.pdf,.png" class="form-control" required name="Decision_Attachment" placeholder="Select Attachment">
+                            <p style="color:red" id="larger_file"></p>
+                           
+                            </div>
+
+                          
+                            <div class="form-group">
+                                <label class="text-bold"> Risk Description <span class="text-danger">*</span></label>
+                                <textarea onkeyup="limitText(this,40)" class="form-control" required name="Risk_Description" placeholder="Enter Risk Detail Here"></textarea>
+                            </div>
+
+                           
+                             @*<div class="form-group">
+                       
+                           <label class="text-bold">Select Study<span class="text-danger">*</span></label><strong id="nostudyselect" style="color:red"></strong>
+                            <select id="orgstudies" onchange="InvestiGatorSite(this.value)" class="form-control" required name="" placeholder="Select A Study">
+                                <option value=""> -- Select a Study -- </option>   
+
+                            </select>
+                            
+                        </div>
+*@
+                       
+                            @*<input type="hidden" name="CreatedBy" value="@ViewBag.UserId" />
+                            <input type="hidden" name="StudyId" value="@ViewBag.UserId" />*@
+
+
+                            <div class="text-right">
+                                <button type="submit" id="subBtn" class="btn btn-primary">Add <i class="icon-database-insert position-right"></i></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+        <script>
+
+            function getorganizationstudies(value)
+     {
+      
+        console.log("function call");
+         $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            data:
+            {
+                organizationid:value
+            },
+            //dataType: "json",
+            success: function(response) {
+
+        
+                $('#studies').empty("");
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+     }
+
+    if ('@ViewBag.Role' == '1') {
+
+        debugger;
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllOrganizations","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) 
+                {
+                    $('#Organization_Id').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].name
+                    }));
+                }
+
+            },
+
+            error: function() {
+                alert("Ajax failed");
+            }
+
+        });
+
+    }
+
+
+    if ('@ViewBag.Role' == '2') {
+    
+     
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+    }
+
+   //$.ajax({
+           
+   //     type: 'GET',
+   //     url: "@Url.Action("GetAllStudies","Ajax")",
+        
+   //     dataType: "json",
+   //     success: function(response) {
+   //         console.log(response);
+            
+
+   //         for (var i = 0; i < response.length; i++) {
+   //             $('#orgstudies').append($('<option>', {
+   //                 value: response[i].id,
+   //                 text: response[i].protocol_Title
+   //             }));
+   //         }
+
+   //     },
+   //     error: function() {
+   //         alert("Ajax failed");
+   //     }
+
+
+   //});
+
+  </script>
+
+        <script>
+
+
+    validdates();
+    function validdates() {
+        debugger;
+        $('#dec_date').attr('min', new Date($.now()).toISOString().slice(0, 10));
+
+
+    }
+
+
+ </script>
+
+   <script>
+    function loadfile(event) {
+        debugger;
+        var output;
+        var size = event.target.files[0].size / 1024 / 1024;
+        size = size.toFixed(2);
+        if (size > 2.01) {
+            
+            document.getElementById("upload_file").value = "";
+
+            $("#larger_file").text("Please select a file less than 2mb!");
+
+            $("#larger_file").fadeOut(4000);
+            return;
+        }
+
+    }
+</script>

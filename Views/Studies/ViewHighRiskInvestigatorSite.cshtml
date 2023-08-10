@@ -1,0 +1,529 @@
+﻿
+
+@{
+
+     ViewBag.Title = "View High Risk Investigator Sites";
+
+}
+<style>
+    .table > tbody > tr > td {
+        padding: 5px !important;
+    }
+</style>
+
+
+<div class="modal fade" id="updateModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="text-center text-bold">Update Investigator Site</h5>
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <form action="@Url.Action("PostUpdateInvestigatorSite","Studies")" method="post" enctype="multipart/form-data">
+
+                    <input type="hidden" name="Id" id="updId"/>
+                    <input type="hidden" name="way" value="@ViewBag.Way" />
+
+
+                            <div class="form-group">
+                                <label class="text-bold">Facility/Institution Name<span class="text-danger">*</span></label>
+                                <input type="text" onkeyup="limitText(this,40)" class="form-control" required name="Facility_Institution_Name" placeholder="Enter Facility/Institution Name Here">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold"> Site No <span class="text-danger">*</span></label>
+                               <input type="number" min="0" onkeyup="limitText(this,40)" class="form-control" required name="Site_No" placeholder="Enter Site Number Here">
+                            </div> 
+                            
+                            <div class="form-group">
+                                <label class="text-bold"> Address <span class="text-danger">*</span></label>
+                                <input type="text" onkeyup="limitText(this,40)" class="form-control" required name="Address" placeholder="Enter Site Address Here">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Qualification Date<span class="text-danger">*</span></label>
+                                <input type="datel" id="q_date" onkeyup="limitText(this,40)" class="form-control" required name="Qualification_Date" placeholder="Enter Qualification Date Here">
+
+                            </div> 
+                            
+
+                            <div class="form-group">
+                                <label class="text-bold"> Recruitment Target <span class="text-danger">*</span></label>
+                               <input type="number" onkeyup="limitText(this,40)" class="form-control" required name="Recruitment_Target" placeholder="Enter Recruitment Target Here">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Monitor Frequency<span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" required name="Monitoring_Frequency" placeholder="Enter Monitoring Frequency Here">
+                            </div>
+                    
+                         
+                            @if (@ViewBag.Role == 1)
+                            {
+                                <div class="form-group">
+                                    <label class="text-bold">Select Study<span class="text-danger">*</span></label>
+                                    <select id="studies" class="form-control" name="StudyId" placeholder="Select Study" required>
+
+                                    </select>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" name="StudyId" value="@ViewBag.StudyId"/>
+                            }
+
+                            
+
+                            <input type="hidden" name="CreatedBy" value="@ViewBag.UserId" />
+                           
+                            <div class="modal-footer">
+                                <button type="submit" value="submit" class="btn btn-primary" id="updSubBtn">Update</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row m-10">
+    <div class="panel panel-flat text-black">
+        <div class="panel-heading" style="background: #E8ECED; padding:1px !important;">
+            <h2 class="text-center text-black">
+                Search
+            </h2>
+            <div class="heading-elements">
+                <ul class="icons-list">
+                    <li><a data-action="collapse" class="rotate-180"></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body pt-20 pb-20" style="display: none">
+            <div class="row">
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Facility Name:</strong></label>
+                        <input type="text" class="form-control" placeholder="Search Name Here" id="searchName" style="background-color:white">
+                    </div>
+                </div>
+
+                
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Site No:</strong></label>
+                        <input type="number" min="0" class="form-control" placeholder="Search Site No Here" id="searchSiteNo" style="background-color:white">
+                    </div>
+                </div>
+
+                   <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Address:</strong></label>
+                        <input type="text" class="form-control" placeholder="Search Address Here" id="searchAddress" style="background-color:white">
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                        <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group text-right">
+                        <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="panel p-20 m-10">
+
+    <div class="row">
+       
+            <center><u><h3>High Risk Investigator Site List</h3></u></center>
+        
+    </div>
+
+    @*@if(ViewBag.Role!=4)
+    {
+        <div class="row">
+        <div class="col-md-8"></div>
+        <div class="col-md-2 pull-right btn-block">
+            <a href="@Url.Action("AddInvestigatorSite","Studies", new{ id= @ViewBag.StudyId})" class="btn btn-primary m-5 pull-right">Add New</a>
+        </div>
+    </div>
+
+    }*@
+    
+
+    <input type="hidden" id="way" value="@ViewBag.Way" />
+
+
+    <div class="table-responsive">
+        <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+            <thead class="bg-indigo-800">
+                <tr>
+                    <th class="text-bold" hidden>...</th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Facility/Institution Name
+                    </th>
+                     <th class="text-bold text-center" style="min-width:140px;">
+                        Site No
+                    </th>
+                     <th class="text-bold text-center" style="min-width:140px;">
+                        Address
+                    </th>
+                     <th class="text-bold text-center" style="min-width:140px;">
+                        Qualification Date
+                    </th> 
+                    
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Recruitment Target
+                    </th> 
+                    
+                    <th class="text-bold text-center" style="min-width:140px;">
+                       Monitoring Frequency
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                       Clinical Trial Agreements
+                    </th>
+                     @*<th class="text-bold text-center" style="min-width:140px;">
+                      View ProtocolDeviation
+                    </th>*@
+                    <th class="text-bold text-center" style="min-width:130px">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<script>
+
+    var way = $('#way').val();
+
+    loadTable();
+
+    function loadTable(Name, siteNo,Address)
+    {
+        $('#userTable').DataTable(
+        {
+            "ajax":
+            {
+                "url": '@Url.Action("GetHighRiskInvestigatorSite", "Ajax")',
+                "type": "POST",
+                "datatype": "json",
+                "data": {
+                    id:@ViewBag.StudyId, Name: Name , siteNo: siteNo, Address : Address
+                }
+            },
+            'columns':
+            [
+                { "data": "hidden", "name": "0" },
+                { "data": "facility_Institution_Name", "name": "Facility_Institution_Name" },
+                { "data": "site_No", "name": "Site_No" },
+                { "data": "address", "name": "Address" },
+                { "data": "qualification_Date", "name": "Qualification_Date" },
+                { "data": "recruitment_Target", "name": "Recruitment_Target" },
+                { "data": "monitoring_Frequency", "name": "Monitoring_Frequency" },
+                { "data": "clinical_Trial_Agreements", "name": "Clinical_Trial_Agreements" },
+                { "data": "Action", "name": "0" },
+            ],
+            'columnDefs':
+            [
+                {
+                    "targets": 0,
+                    "visible": false,
+                    "searchable": false,
+                    "render": function (data, type, full, meta) {
+                        console.log(full);
+                        return null;
+                    }
+                },
+                {
+                    "targets": 1,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.facility_Institution_Name ;
+                    }
+                }, {
+                    "targets": 2,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.site_No ;
+                    }
+                }, {
+                    "targets": 3,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.address ;
+                    }
+                }, {
+                    "targets": 4,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.qualification_Date ;
+                    }
+                }, {
+                    "targets": 5,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.recruitment_Target ;
+                    }
+                },
+                {
+                    "targets": 6,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.monitoring_Frequency ;
+                    }
+                },
+
+                  {
+                    "targets": 7,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return `<a href="../../${full.clinical_Trial_Agreements}"   download="Clinical trial agreement" > View Agreements </a>` ;
+                    }
+                },
+                //{
+                //    "targets": 8,
+                //    'className': '',
+                //    "render": function (data, type, full, meta)
+                //    {
+                //        return '<a  href="../../Studies/ViewProtocolDeviations?investigatorid=' + full.id + '"> View ProtocolDeviations </a>' ;
+                //    }
+                //},
+              
+                {
+                    "targets": 8,
+                    'className': '',
+                    'sortable': false,
+                    "render": function (data, type, full, meta)
+                    {
+
+                        if ('@ViewBag.Role' != 4 && '@ViewBag.Role' != 5 && '@ViewBag.Role'!="1" && '@ViewBag.Role'!="2" && '@ViewBag.Role'!="3" ) {
+
+                            var x = '';
+                            var y = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:152px;padding-left:5px !important;">';
+                            // var viewprof= '<a class="btn btn-sm bg-primary fa fa-eye" href="../Admin/TakeSS?Email='+full.email+'&Pass='+full.password+'" title="View User Profile"></a>'
+                            if (full.isActive == 3) {
+                                x = '<button class="btn btn-sm bg-primary fa fa-solid fa-check mr-5" style="padding: 11px 15px;" onclick="AccountActivate(' + full.id + ')" title="Activate Account" ></button>';
+                            }
+                            else {
+                                if (full.isActive == 2) {
+                                    x = '<button class="btn btn-sm bg-primary icon-stats-bars" onclick="PendingApproval(' + full.id + ')" title="Pending Approval"></button>';
+
+                                }
+                                else {
+                                    x = '';
+                                    y = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:101px;padding-left:5px !important;">'
+                                }
+                            }
+                            return '<ul class="icons-list"> ' +
+                                '<li class="dropdown" >' +
+                                '			<a href="#" class="dropdown-toggle" data-toggle="dropdown">' +
+                                '				<i class="icon-menu9"></i>' +
+                                '			</a>' +
+                                y +
+                                '				<li>' +
+                                '                   <button class="btn btn-sm bg-info icon-pencil" onclick="updateFunction(' + full.id + ')" title="Edit"></button>' +
+                                '                   <button class="btn btn-sm bg-danger icon-bin mr-5" onclick="deleteFunction(' + full.id + ')" title="Delete"></button>' +
+                                x +
+                                '               </li>' +
+                                '			</ul>' +
+                                '		</li >' +
+                                '	</ul >';
+
+                        }
+
+                        else 
+                        {
+                            var NA = "N/A";
+                            return NA;
+                        }
+                    }
+                },
+            ],
+            "serverSide": "true",
+            "processing": "true",
+            "language":
+            {
+                "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                "search": "<span>Search :</span> _INPUT_",
+                "searchPlaceholder": "Filter Data",
+                "lengthMenu": "<span>Show :</span> _MENU_",
+                "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+            }
+        });
+    }
+
+
+    function searchTable()
+    {
+        var name = $('#searchName').val();
+        var SiteNo = $('#searchSiteNo').val();
+        var searchAddress = $('#searchAddress').val();
+
+        
+
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+        $('#userTable').DataTable().destroy();
+        
+
+        loadTable(name, SiteNo,searchAddress);
+    }
+
+    function clearSearch()
+    {
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+
+        $('#searchName').val("");
+        ('#searchSiteNo').val("");
+        $('#searchAddress').val("");
+
+        loadTable();
+    }
+
+
+    function updateFunction(id)
+    {
+        $('#updEmailErrMsg').text("");
+        $('#updSubBtn').attr('disabled', false);
+
+        $("#loadImg").show();
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetInvestigatorSiteById","Ajax")',
+            dataType: "json",
+            data: {
+                id: id
+            },
+            success: function (response)
+            {
+                if (response == 0) {
+                    alert("Record not found, Please reload the page.");
+                }
+                console.log(response);
+                
+                $("#updId").val(response.id);
+                $("#studyid").val(response.studyId);
+
+                var qDate = response.qualification_Date;
+                var new_date = qDate.split("T");
+                var Qualification_Date = new_date[0];
+
+                $("[name='Facility_Institution_Name']").val(response.facility_Institution_Name);
+                $("[name='Site_No']").val(response.site_No);
+                $("[name='Address']").val(response.address);               
+                $("[name='Qualification_Date']").val(Qualification_Date);
+                $("[name='Recruitment_Target']").val(response.recruitment_Target);
+                $("[name='Monitoring_Frequency']").val(response.monitoring_Frequency);
+                $("[name='CreatedBy']").val(response.createdBy);
+                $("[name='StudyId']").val(response.studyId);
+             
+                //$("#updEmail").val(response.email);
+                ////$("#updContact").val(response.contact);
+                //$("#updPassword").val(response.password);
+                //$("#updGender").val(response.gender);
+                //$("#updCountry").val(response.country);
+                //$("#updCity").val(response.city);
+                //$("#updOrganization").val(response.organization);
+                //$("#updWebsite").val(response.website);
+                //$("#updDescription").val(response.description);
+                //$("#updZipCode").val(response.zipCode);
+
+
+                $("#loadImg").hide();
+                $("#updateModal").modal('show');
+            },
+            error: function ()
+            {
+                $("#loadImg").hide();
+              
+                alert("ajax Failed");
+            }
+        });
+
+    }
+
+  
+
+
+    function deleteFunction(id) {
+        $('#confirmModalHeading').text('Warning!');
+        $('#confirmModalHeader').removeClass('bg-success');
+        $('#confirmModalHeader').addClass('bg-danger');
+        $('#confirmModalText').empty();
+         $('#confirmModalText').append('Do you really want to delete this Record?');
+
+        //$("#confirmModalForm").attr("action", "../Studies/DeleteInvestigatorSite?id=" + id + "&way=@ViewBag.Way");
+        $("#confirmModalForm").attr("action", '@Url.Action("DeleteInvestigatorSite","Studies")?id='+id);
+
+        $('#confirmModal').modal('show');
+    }
+
+    $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#studies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+
+
+</script>
+<script>
+
+
+    validdates();
+    function validdates() {
+        debugger;
+        $('#q_date').attr('min', new Date($.now()).toISOString().slice(0, 16));
+
+
+    }
+
+
+
+
+</script>

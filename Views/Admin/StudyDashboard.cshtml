@@ -1,0 +1,325 @@
+﻿@using ClinicalWebApplication.Models
+@using Microsoft.Data.SqlClient;
+@inject SqlConnection de
+@using ClinicalWebApplication.BL
+@using System.Security.Claims;
+@{
+    ViewBag.Title = " Study Dashboard ";
+
+    var Userid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+    var CurrentUserRecord = new UserBL().GetActiveUserById(Convert.ToInt32(Userid), de);
+
+}
+
+@model Study
+<!-- Page container -->
+<div class="page-container">
+
+    <!-- Page content -->
+    <div class="page-content">
+
+
+        <!-- Main content -->
+        <div class="content-wrapper">
+
+            <!-- Page header -->
+            <div class="page-header page-header-default">
+             
+
+                <div class="breadcrumb-line">
+                    <ul class="breadcrumb">
+                        <li><a href="#"><i class="icon-home2 position-left"></i> Home</a></li>
+                        <li class="active">@ViewBag.Title</li>
+                    </ul>
+
+                    <ul class="breadcrumb-elements">
+                        <li><a href="#"><i class="icon-user position-left"></i> @CurrentUserRecord.FirstName @CurrentUserRecord.LastName</a></li>
+                        <li><a href="#"><i class="icon-statistics position-left"></i> Signed in at: @DateTime.Now</a></li>
+                        @*<li><a href="../Auth/Logout"><i class="icon-gear position-left"></i> Log Out</a></li>*@
+                   
+                    </ul>
+                </div>
+            </div>
+            <!-- /page header -->
+
+            <style type="text/css">
+                .form-control {
+                    padding-left: 10px;
+                    padding-right: 0;
+                    border-width: 1px;
+                    border-color: #00000052;
+                    border-radius: 8px;
+                    margin-top: 16px;
+                }
+
+                .card-radius {
+                    border-radius: 25px;
+                }
+
+                .box-gradient{
+                    background: linear-gradient(180deg, rgba(252,252,252,1) 0%, rgba(255,255,255,1) 50%) !important;                   
+                }
+
+                .has-fixed-height {
+                    height: 238px !important;
+                }
+            </style>
+
+            <!-- Content area -->
+            <div class="content">
+                <!-- Fisrt Row -->
+                <div class="row mb-20">
+                    <div class="col-lg-6">
+                        <h2 class="heading-margin-top"><b>Hello!</b> @CurrentUserRecord.FirstName, what would you like to do today?</h2>
+                    </div>
+                    <div class="col-lg-6">
+                        <input type="text" class="form-control" placeholder="You can say things like: Show me protocol deviations">
+                    </div>
+                </div>
+                <!-- /First Row -->
+                <style>
+                    @@media only screen and (max-width: 768px) {
+                        .cards-padding-xs {
+                            padding-left: 0px;
+                            padding-right: 0px;
+                        }
+
+                        .buttons-margin-xs {
+                            margin-bottom: 10px;
+                        }
+
+                        .heading-margin-top{
+                            margin-top:56px;
+                        }
+                    }
+
+                    .sfpro-font{
+                        font-family: "SfproRegular" !important
+                    }
+
+                    .box-heading {
+                        font-size: 12pt !important;
+                        font-family: "SfproRegular";
+                    }
+
+                    .box-values{
+                        font-size:16pt !important;
+                        font-family: "SfproBold";                       
+                    }
+
+                    .box-height{
+                        min-height:156px;
+                    }
+
+                    .btn-styling{
+                        background: linear-gradient(180deg, rgba(252,252,252,1) 0%, rgba(255,255,255,1) 50%) !important;
+                        box-shadow: 0px 0px 8px rgb(4 4 4 / 14%);
+                        transition: all 0.3s ease 0s;
+                        color:#000;
+                    }
+
+                    .btn-styling:hover {
+                        background: linear-gradient(180deg, rgba(252,252,252,1) 0%, rgba(255,255,255,1) 50%) !important;
+                        box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+                        transform: translateY(-7px);
+                        color:#000;
+                            border: 1px solid #A5A5A5;
+                    }
+
+                        .btn-styling:visited {
+                            background: linear-gradient(180deg, rgba(252,252,252,1) 0%, rgba(255,255,255,1) 50%) !important;
+                            box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+                            transform: translateY(-7px);
+                            color: #000;
+                            border: 1px solid #A5A5A5;
+                        }
+
+                        /*Sfpro Fonts*/
+
+                    @@font-face {
+                        font-family: 'SfproRegular';
+                        src: url("/assets/fonts/FontsFree-Net-SFProDisplay-Regular.ttf");
+                        }
+
+                    @@font-face {
+                        font-family: 'SfproBold';
+                        src: url("/assets/fonts/FontsFree-Net-SFProDisplay-Heavy-1.ttf");
+                    }
+
+/*                    .centered-text{
+                        position:absolute;
+                        top:23%;
+                        left:16%;
+                        text-align:center;
+                    }*/
+                </style>
+                <!-- Cards -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="col-md-6 cards-padding-xs" style="padding-left:0px;">
+                            <div class="panel panel-default card-radius">
+                                <div class="panel-heading card-radius text-center box-height box-gradient"><p class="box-heading">No. of Investigator Sites</p><h2 class="box-values" style="color:#0e72b6"><b>@ViewBag.InvestigatorSites</b></h2></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 cards-padding-xs" style="padding-right:0px;">
+                            <div class="panel panel-default card-radius">
+                                <div class="panel-heading card-radius text-center box-height box-gradient">
+                                    <p class="box-heading">No.of Protocol Deviations</p><h2 class="box-values" style="color:#0e72b6;"><b>@ViewBag.ProtocolDeviation</b></h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="panel panel-default card-radius">
+                            <div class="panel-heading card-radius text-center box-height box-gradient"><p class="box-heading">Disease Type</p><h2 class="box-values" style="color:#0e72b6;"><b>@Model.Condition_Or_Disease</b></h2></div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="col-md-6 cards-padding-xs" style="padding-left:0px;">
+                            <div class="panel panel-default card-radius">
+                                <div class="panel-heading card-radius text-center box-height box-gradient"><p class="box-heading">TBD</p><h2 class="box-values" style="color:#0e72b6;"><b>N/A</b></h2></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 cards-padding-xs" style="padding-right:0px;">
+                            <div class="panel panel-default card-radius">
+                                <div class="panel-heading card-radius text-center box-height box-gradient"><p class="box-heading">No. of Open Tasks</p><h2 class="box-values" style="color:#0e72b6;"><b>0</b></h2></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Cards -->
+                <!-- Dashboard content -->
+                <div class="row" style="padding-bottom: 20px;">
+
+                    <div class="col-lg-12">
+
+                  
+                        <!-- Charts -->
+                        <div class="row">
+                            <div class="col-md-4">
+                                <!-- Basic pie chart -->
+                                <div class="panel panel-flat card-radius">
+                                    <div class="panel-heading card-radius">
+                                        <h5 class="panel-title sfpro-font">Leave this space clear for a Bar Chart</h5>
+                                        <div class="heading-elements">
+                                            <ul class="icons-list">
+                                                <li><a data-action="collapse"></a></li>
+                                                <li><a data-action="reload"></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel-body">
+                                        <div class="chart-container has-scroll">
+                                            <div class="chart has-fixed-height has-minimum-width" id="basic_pie"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /bacis pie chart -->
+                            </div>
+                            <div class="col-md-4">
+                                <!-- Basic pie chart -->
+                                <div class="panel panel-flat card-radius">
+                                    <div class="panel-heading card-radius">
+                                        <h5 class="panel-title sfpro-font">Leave this space clear for a Pie Chart</h5>
+                                        <div class="heading-elements">
+                                            <ul class="icons-list">
+                                                <li><a data-action="collapse"></a></li>
+                                                <li><a data-action="reload"></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel-body">
+                                        <div class="chart-container has-scroll">
+                                            <div class="chart has-fixed-height has-minimum-width" id="basic_pie"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /bacis pie chart -->
+                            </div>
+                            <div class="col-md-4">
+                                <!-- Basic pie chart -->
+                                <div class="panel panel-flat card-radius">
+                                    <div class="panel-heading card-radius">
+                                        <h5 class="panel-title sfpro-font">Leave this space clear for a Line Chart</h5>
+                                        <div class="heading-elements">
+                                            <ul class="icons-list">
+                                                <li><a data-action="collapse"></a></li>
+                                                <li><a data-action="reload"></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel-body">
+                                        <div class="chart-container has-scroll">
+                                            <div class="chart has-fixed-height has-minimum-width" id="basic_pie"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /bacis pie chart -->
+                            </div>
+                        </div>
+                        <!-- /Charts -->
+                        <!-- Buttons -->
+                        <div class="row mt-20">
+                            <div class="col-md-3 col-xs-12 buttons-margin-xs">
+                                <a href="@Url.Action("ViewStudy","Studies", new {id =@Model.Id})" class="btn btn-primary btn-styling" style="width: 100%; border-radius: 20px;">Study Design</a>
+                            </div>
+
+                             <div class="col-md-3 col-xs-12 buttons-margin-xs">
+                                <a href="@Url.Action("viewActions", "Studies", new {id =@Model.Id})" class="btn btn-primary btn-styling" style="width: 100%; border-radius: 20px;"> Study Actions</a>
+                                
+                            </div>
+
+                            <div class="col-md-3 col-xs-6">
+                                <a href="@Url.Action("viewDecisions", "Studies", new {id =@Model.Id})" class="btn btn-primary btn-styling" style="width: 100%; border-radius: 20px;">Study Decisions</a>
+                               
+                            </div>
+
+                            <div class="col-md-3 col-xs-6">
+                                <a href="@Url.Action("viewInformative","Studies", new {id =@Model.Id})" class="btn btn-primary btn-styling" style="width: 100%; border-radius: 20px;">Study Informativs</a>
+                                
+                            </div>
+                         
+                        </div>
+                        <!-- /Buttons -->
+                        <!-- Buttons -->
+                        <div class="row mt-20">
+                        
+                            <div class="col-md-3 col-xs-6">
+                                <a href="@Url.Action("ViewProtocolDeviations","Studies", new {id =@Model.Id})" class="btn btn-info btn-styling" style="width: 100%; border-radius: 20px;">Protocol Deviations</a>
+                            </div>
+
+                            <div class="col-md-3 col-xs-6 buttons-margin-xs">
+                                <a href="@Url.Action("ViewInvestigatorSites","Studies", new {id =@Model.Id})" class="btn btn-danger btn-styling" style="width: 100%; border-radius: 20px;">Investigator Sites</a>
+                            </div>
+
+                            @*<div class="col-md-3 col-xs-12 buttons-margin-xs">
+                                <a href="#" class="btn btn-warning btn-styling" style="width: 100%; border-radius: 20px;">Actions/Decisions/Information</a>
+                            </div>
+
+                            <div class="col-md-3 col-xs-12 buttons-margin-xs">
+                                <a href="#" class="btn btn-primary btn-styling" style="width: 100%; border-radius: 20px;">TBD</a>
+                            </div>*@
+                        </div>
+                        <!-- /Buttons -->
+
+                    </div>
+                </div>
+                <!-- /dashboard content -->
+
+            </div>
+            <!-- /content area -->
+
+        </div>
+        <!-- /main content -->
+
+    </div>
+    <!-- /page content -->
+
+</div>
+<!-- /page container -->

@@ -1,0 +1,303 @@
+﻿@using ClinicalWebApplication.Models
+@using Microsoft.Data.SqlClient;
+@inject SqlConnection de
+@using ClinicalWebApplication.BL
+@using System.Security.Claims;
+@{
+    ViewBag.Title = "Add Informatives";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var Userid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+    var CurrentUserRecord = new UserBL().GetActiveUserById(Convert.ToInt32(Userid), de);
+
+}
+
+<div class="p-20">
+
+    <div class="row">
+        <form action="@Url.Action("PostAddInformativ", "Studies")" method="post" enctype="multipart/form-data">
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-flat">
+                        <div class="panel-heading">
+
+                            <h2 class="panel-title text-center text-bold">Add Informative</h2>
+
+                        </div>
+
+                        <div class="panel-body">
+
+                            <legend class="text-bold text-uppercase"><span class="text-danger">*</span>Fields are mandatory to fill</legend>
+
+
+                            <div class="form-group">
+                                <label class="text-bold"> Information Date <span class="text-danger">*</span></label>
+                                <input type="date" id="info_date"  class="form-control" required name="Informative_Date">
+                            </div>
+
+                            @if (ViewBag.Role == 1)
+                            {
+                                <div class="form-group">
+                                    <label class="text-bold">Select Organization<span class="text-danger">*</span></label>
+                                    <select id="Organization_Id" onchange="getorganizationstudies(this.value)" class="form-control" name="OrganizationId"  required>
+                                        <option>--select an option--</option>
+
+                                    </select>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" name="OrganizationId" value="@ViewBag.organizationid" />
+                            }
+
+                            @if (ViewBag.Role == 1 || ViewBag.Role == 2)
+                            {
+                                <div class="form-group">
+                                    <label class="text-bold">Select Study<span class="text-danger">*</span></label>
+                                    <select id="orgstudies" class="form-control" name="StudyId" placeholder="Select Study" required>
+
+                                    </select>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" name="StudyId" value="@ViewBag.StudyId" />
+                            }
+
+                            @*<div class="form-group">
+                                <label class="text-bold">Study<span class="text-danger">*</span></label>
+                                <input type="text" min="0" onkeyup="limitText(this,40)" class="form-control" required name="StudyId" value="2" placeholder="Enter Subject Number Here">
+                            </div>*@
+                            
+                            @*<div class="form-group">
+                       
+                           <label class="text-bold">Select Study<span class="text-danger">*</span></label>
+                            <select id="orgstudies"  class="form-control" required name="StudyId" >
+                                <option value=""> -- Select a Study -- </option>   
+
+                            </select>
+                            
+                        </div>*@
+
+                            <div class="form-group">
+                                <label class="text-bold"> Status <span class="text-danger">*</span></label>
+                                <select class="form-control" required name="Status" placeholder="Enter Subject Status Here">
+                                    <option>--Select Status--</option>
+                                    <option>Open</option>
+                                    <option>Close</option>
+                                    
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold"> Target Close Date <span class="text-danger">*</span></label>
+                                <input type="date" id="tclose_date" class="form-control" required name="Targeted_Close_Date">
+                            </div>
+
+                             <div class="form-group">
+                                <label class="text-bold">Acual Close Date<span class="text-danger">*</span></label>
+                                <input type="date" id="ac_date" class="form-control" required name="Actual_Close_Date">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold"> Information Details <span class="text-danger">*</span></label>
+                                <textarea onkeyup="limitText(this,40)" class="form-control" required name="Informative_Details" placeholder="Enter Action Detail Here"></textarea>
+                            </div>
+
+                           
+
+                           
+                             @*<div class="form-group">
+                       
+                           <label class="text-bold">Select Study<span class="text-danger">*</span></label><strong id="nostudyselect" style="color:red"></strong>
+                            <select id="orgstudies" onchange="InvestiGatorSite(this.value)" class="form-control" required name="" placeholder="Select A Study">
+                                <option value=""> -- Select a Study -- </option>   
+
+                            </select>
+                            
+                        </div>
+*@
+                       
+                            @*<input type="hidden" name="CreatedBy" value="@ViewBag.UserId" />
+                            <input type="hidden" name="StudyId" value="@ViewBag.UserId" />*@
+
+
+                            <div class="text-right">
+                                <button type="submit" id="subBtn" class="btn btn-primary">Add <i class="icon-database-insert position-right"></i></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+
+   <script>
+
+         function getorganizationstudies(value)
+     {
+      
+        console.log("function call");
+         $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            data:
+            {
+                organizationid:value
+            },
+            //dataType: "json",
+            success: function(response) {
+
+        
+                $('#studies').empty("");
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+     }
+
+    if ('@ViewBag.Role' == '1') {
+
+        debugger;
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllOrganizations","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) 
+                {
+                    $('#Organization_Id').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].name
+                    }));
+                }
+
+            },
+
+            error: function() {
+                alert("Ajax failed");
+            }
+
+        });
+
+    }
+
+
+    if ('@ViewBag.Role' == '2') {
+    
+     
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+    }
+
+   //$.ajax({
+           
+   //     type: 'GET',
+   //     url: "@Url.Action("GetAllStudies","Ajax")",
+        
+   //     dataType: "json",
+   //     success: function(response) {
+   //         console.log(response);
+           
+
+   //         for (var i = 0; i < response.length; i++) {
+   //             $('#orgstudies').append($('<option>', {
+   //                 value: response[i].id,
+   //                 text: response[i].protocol_Title
+   //             }));
+   //         }
+
+   //     },
+   //     error: function() {
+   //         alert("Ajax failed");
+   //     }
+
+
+   //});
+
+                            </script>
+
+
+
+   <script>
+
+    $('#info_date').attr('min', new Date($.now()).toISOString().slice(0, 10));
+    $(document).on("change", "#info_date", function() {
+        debugger;
+        var date = $(this).val();
+        var tempdt = date.split("T");
+
+        //var tomorrow = date.setDate(date.getDate() + 1);
+        var newDate = new Date(date);
+
+        //var tomorrow = date.add(1).day();
+
+       //var today = moment();
+        var tomorrow = moment(newDate).add(1, 'days').format("YYYY-MM-DD");
+        var minDate = tomorrow/*+'T'+tempdt[1]*/;
+
+        $('#tclose_date').val("");
+        $('#tclose_date').attr('min', minDate);
+        //$('#EC_date').val("");
+        //$('#EC_date').attr('min', date);
+
+    });
+
+    $(document).on("change", "#tclose_date", function() {
+        debugger
+        var date = $(this).val();
+
+         var tempdt = date.split("T");
+
+        //var tomorrow = date.setDate(date.getDate() + 1);
+        var newDate = new Date(date);
+
+        //var tomorrow = date.add(1).day();
+
+       //var today = moment();
+        var tomorrow = moment(newDate).add(1, 'days').format("YYYY-MM-DD");
+        var minDate = tomorrow/*+'T'+tempdt[1]*/;
+
+
+        $('#ac_date').val("");
+        $('#ac_date').attr('min', minDate);
+
+    });
+</script>

@@ -1,0 +1,100 @@
+﻿
+@{
+   
+        ViewBag.Title = "Add Organization";
+    
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-20">
+
+    <div class="row">
+        <form action="@Url.Action("PostAddOrganization", "Admin")" method="post">
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-flat">
+                        <div class="panel-heading">
+                          
+                                <h2 class="panel-title text-center text-bold">Add Organization</h2>
+                            
+                           
+                        </div>
+
+                        <div class="panel-body">
+                            <legend class="text-bold text-uppercase"><span class="text-danger">*</span> Fields are mandatory to fill</legend>
+
+
+                            <div class="form-group">
+                                <label class="text-bold">Organization Name <span class="text-danger">*</span></label>
+                                <input type="text" onkeyup="CheckOrganization(this.value)" id="org_id" class="form-control" required name="Name" placeholder="Enter Organization Name Here">
+                            <p style="color:red" id="org_exist"></p>
+                            </div>
+
+                            <input type="hidden" name="CreatedBy" value="@ViewBag.AdminId" />
+                           
+
+                            <div class="text-right">
+                                <button type="submit" id="subBtn" disabled class="btn btn-primary">Add <i class="icon-database-insert position-right"></i></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+
+<script>
+
+    function CheckOrganization(value) {
+        debugger;
+        $("#subBtn").prop('disabled', true);
+
+        $.ajax({
+            type: 'GET',
+            //url: "../Ajax/CheckOrganization",
+            url: "@Url.Action("CheckOrganization","Ajax")",
+            data:
+            {
+                org: value
+            },
+            dataType: "json",
+            success: function(response) {
+                debugger;
+                if (response == true) {
+                    //$("#sbmit_btn").attr("enable",true)
+                    $("#subBtn").prop('disabled', false);
+                    return
+
+                }
+                else {
+
+                    //$("#org_id").val("");
+
+
+                    $("#org_exist").html("This organization name is already exist please try another name!");
+
+                    $("#subBtn").prop('disabled', true);
+
+                    $("#org_exist").fadeOut(4000);
+                    return
+                }
+
+
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+    }
+
+
+
+
+
+</script>

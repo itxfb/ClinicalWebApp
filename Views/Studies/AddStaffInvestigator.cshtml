@@ -1,0 +1,466 @@
+﻿@using ClinicalWebApplication.Models
+@using Microsoft.Data.SqlClient;
+@inject SqlConnection de
+@using ClinicalWebApplication.BL
+@using System.Security.Claims;
+@{
+    ViewBag.Title = "Add Investigator Staff";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var Userid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+    var CurrentUserRecord = new UserBL().GetActiveUserById(Convert.ToInt32(Userid), de);
+
+}
+
+<div class="p-20">
+
+    <div class="row">
+        <form action="@Url.Action("PostAddInvestigatorStaff", "Studies")" method="post" enctype="multipart/form-data">
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-flat">
+                        <div class="panel-heading">
+
+                            <h2 class="panel-title text-center text-bold">Add Investigator Site Staff</h2>
+
+                        </div>
+
+                        <div class="panel-body">
+
+                            <legend class="text-bold text-uppercase"><span class="text-danger">*</span> Fields are mandatory to fill</legend>
+
+                             @if (ViewBag.Role == 1)
+                            {
+                                <div class="form-group">
+                                    <label class="text-bold">Select Organization<span class="text-danger">*</span></label>
+                                    <select id="Organization_Id" onchange="getorganizationstudies(this.value)" class="form-control" name=""  required>
+                                        <option disabled>--select an option--</option>
+                                        <option hidden></option>
+
+                                    </select>
+                                </div>
+
+                            }
+                            
+
+                           
+
+                            @if(ViewBag.Role != 3)
+                            {
+                                  <div class="form-group">
+                       
+                           <label class="text-bold">Select Study<span class="text-danger">*</span></label><strong id="nostudyselect" style="color:red"></strong>
+                            <select id="orgstudies" onchange="GetInvestiGatorSite(this.value)" class="form-control" required name="" placeholder="Select A Study">
+                                <option value="" > -- Select a Study -- </option>   
+
+                            </select>
+                            
+                                </div>
+
+                            }
+                           
+
+                           
+
+                             <div class="form-group">
+                       
+                           <label class="text-bold">Investigator Site (Site No)<span class="text-danger">*</span></label>
+                            <select id="investigatorSites" class="form-control" required name="InvestigatorSiteId" >
+                                   
+                            </select>
+                            
+                        </div>
+                        <div class="form-group">
+                                    <label class="text-bold"> Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="Full_Name" class="fullname form-control" placeholder="Enter Staff Name Here" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-bold"> Email <span class="text-danger">*</span></label>
+                                    <input type="email" onkeyup="Checkemail(this.value)" name="Email"  class="email form-control" placeholder="Enter Staff Email Here" required>
+                                
+                                <p style="color:red" id="org_exist"></p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-bold"> Role <span class="text-danger">*</span></label>
+                                    <select  class="role form-control" name="Role" placeholder="Select Staff Role Here" required>
+                                        <option value="" disabled> --Select A Role-- </option>
+                                        <option value="6"> Principal Investigator </option>
+                                        <option value="7"> Sub-Investigator </option>
+                                        <option value="8"> Study Coordinator </option>
+                                        <option value="9"> Clinical Rater </option>
+                                    </select>
+                                </div>
+
+                            <div class="text-right">
+                                <button type="submit" id="subBtn" class="btn btn-primary">Add <i class="icon-database-insert position-right"></i></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+<script>
+
+     if ('@ViewBag.Role' == '1') {
+
+        debugger;
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllOrganizations","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) 
+                {
+                    $('#Organization_Id').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].name
+                    }));
+                }
+
+            },
+
+            error: function() {
+                alert("Ajax failed");
+            }
+
+        });
+
+    }
+
+
+    if ('@ViewBag.Role' == '2') {
+    
+     
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+    }
+
+
+      function getorganizationstudies(value)
+      
+     {
+      
+        console.log("function call");
+         $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            data:
+            {
+                organizationid:value
+            },
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+     }
+
+
+</script>
+
+<script>
+
+    //  $.ajax({
+           
+    //    type: 'GET',
+    //    url: "@Url.Action("GetAllInvestigatorSitesByStudyId","Ajax")",
+    //    data: {
+            
+    //        id: '@ViewBag.StudyId'
+    //        //id: studyid
+    //                   },
+    //    dataType: "json",
+    //    success: function(response) {
+    //        console.log(response);
+       
+    //        $('#investigatorSites').empty("");
+    //        for (var i = 0; i < response.length; i++) {
+    //            $('#investigatorSites').append($('<option>', {
+    //                value: response[i].id,
+    //                text: response[i].facility_Institution_Name +" ( " + response[i].site_No +" ) "
+    //            }));
+    //        }
+
+    //    },
+    //    error: function() {
+    //        alert("Ajax failed");
+    //    }
+    //});
+if ('@ViewBag.Role' == '3')
+{
+    debugger;
+    GetInvestiGatorSite('@ViewBag.StudyId');
+
+    //GetCraByStudyId('@ViewBag.StudyId');
+}
+
+function GetInvestiGatorSite(studyid)
+{
+  
+    debugger;
+    if (studyid == "" || studyid == null) {
+
+        $("#nostudyselect").html("please select a study");
+        $("#nostudyselect").fadeOut(5000);
+    }
+    else
+    {
+        $("#nostudyselect").html("");
+         $.ajax({
+           
+        type: 'GET',
+        url: "@Url.Action("GetAllInvestigatorSitesByStudyId","Ajax")",
+        data: {
+            //id: '@ViewBag.StudyId'
+            id: studyid
+                       },
+        dataType: "json",
+        success: function(response) {
+            console.log(response);
+            debugger;
+            $('#investigatorSites').empty("");
+            for (var i = 0; i < response.length; i++) {
+                $('#investigatorSites').append($('<option>', {
+                    value: response[i].id,
+                    text: response[i].facility_Institution_Name +" ( " + response[i].site_No +" ) "
+                }));
+            }
+
+
+
+
+        },
+        error: function() {
+            alert("Ajax failed");
+        }
+    });
+
+    if ('@ViewBag.Role' != '3')
+
+{
+        GetCraByStudyId(studyid);
+}
+          
+   }
+   
+
+}
+
+function GetCraByStudyId(studyid)
+{
+    debugger;
+
+ $.ajax({
+           
+        type: 'GET',
+        url: "@Url.Action("GetAllCRAsByStudyId","Ajax")",
+         data: {
+           // id: '@ViewBag.OrganizationId' },
+            id: studyid },
+        dataType: "json",
+        success: function(response) {
+          
+        $('#craLists').empty("");
+
+            for (var i = 0; i < response.length; i++) {
+                $('#craLists').append($('<option>', {
+                    value: response[i].firstName+" "+ response[i].lastName,
+                    text: response[i].firstName+" "+ response[i].lastName
+                }));
+            }
+
+        },
+        error: function() {
+            alert("Ajax failed");
+        }
+
+
+   });
+
+}
+       
+
+
+    
+    //get studies
+   //     $.ajax({
+           
+   //     type: 'GET',
+   //     url: "@Url.Action("GetAllStudies","Ajax")",
+        
+   //     dataType: "json",
+   //     success: function(response) {
+   //         console.log(response);
+        
+
+   //         for (var i = 0; i < response.length; i++) {
+   //             $('#orgstudies').append($('<option>', {
+   //                 value: response[i].id,
+   //                 text: response[i].protocol_Title
+   //             }));
+   //         }
+
+   //     },
+   //     error: function() {
+   //         alert("Ajax failed");
+   //     }
+
+
+   //});   
+   
+   
+   //$.ajax({
+           
+   //     type: 'GET',
+   //     url: "@Url.Action("GetAllCRAsByOrganizationId","Ajax")",
+   //      data: {
+   //         id: '@ViewBag.OrganizationId' },
+   //     dataType: "json",
+   //     success: function(response) {
+          
+        
+
+   //         for (var i = 0; i < response.length; i++) {
+   //             $('#craLists').append($('<option>', {
+   //                 value: response[i].firstName+" "+ response[i].lastName,
+   //                 text: response[i].firstName+" "+ response[i].lastName
+   //             }));
+   //         }
+
+   //     },
+   //     error: function() {
+   //         alert("Ajax failed");
+   //     }
+
+
+   //});
+    
+
+    </script>
+
+
+    <script>
+        function showethicsnotifieddate(value)
+        {
+            if (value == "Yes") {
+
+                $("#EthicNotify_Date").show();
+                $("#Ethics_Date").val("");
+
+            }
+            else
+            {
+                $("#EthicNotify_Date").hide();
+                $("#Ethics_Date").val("");
+
+                
+            }
+
+        }
+
+    </script>
+
+         <script>
+
+
+    validdates();
+    function validdates() {
+        debugger;
+        $('#Ethics_Date').attr('min', new Date($.now()).toISOString().slice(0, 16));
+        $('#sponsor_date').attr('min', new Date($.now()).toISOString().slice(0, 16));
+
+
+    }
+
+
+
+
+                    </script>
+
+ <script>
+
+    function Checkemail(value) {
+        debugger;
+        $("#subBtn").prop('disabled', true);
+
+        $.ajax({
+            type: 'GET',
+            //url: "../Ajax/CheckOrganization",
+            url: "@Url.Action("CheckInvestigatorStaffemail","Ajax")",
+            data:
+            {
+                email: value
+            },
+            dataType: "json",
+            success: function(response) {
+                debugger;
+                if (response == true) {
+                    //$("#sbmit_btn").attr("enable",true)
+                    $("#subBtn").prop('disabled', false);
+                    return
+
+                }
+                else {
+
+                    //$("#org_id").val("");
+
+
+                    $("#org_exist").html("This email is already exist please try another email!");
+
+                    $("#subBtn").prop('disabled', true);
+
+                    $("#org_exist").fadeOut(4000);
+                    return
+                }
+
+
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+    }
+
+
+</script>

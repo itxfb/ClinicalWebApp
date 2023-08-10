@@ -1,0 +1,865 @@
+﻿@{
+
+    ViewBag.Title = "View Monitoring visit";
+
+}
+<style>
+    .table > tbody > tr > td {
+        padding: 5px !important;
+    }
+</style>
+
+
+<div class="modal fade" id="updateModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form action="@Url.Action("PostUpdateMonitoringVisit", "Studies")" method="post" enctype="multipart/form-data">
+
+                    @*<div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-flat">*@
+                    <div class="panel-heading">
+
+                        <h2 class="panel-title text-center text-bold">Update Monitoring Visit</h2>
+
+                    </div>
+
+                    <div class="panel-body">
+
+                        <legend class="text-bold text-uppercase"><span class="text-danger">*</span> Fields are mandatory to fill</legend>
+
+                        @if (ViewBag.Role == 1)
+                        {
+                            <div class="form-group">
+                                <label class="text-bold">Select Organization<span class="text-danger">*</span></label>
+                                <select id="Organization_Id" onchange="getorganizationstudies(this.value)" class="form-control" name="OrganizationId" required>
+                                    <option value="">--select an option--</option>
+                                    <option hidden></option>
+
+                                </select>
+                            </div>
+
+                        }
+
+
+                        else
+                        {
+                            <input type="hidden" name="OrganizationId" value="@ViewBag.organizationid" />
+                        }
+
+                        @if (ViewBag.Role != 3)
+                        {
+                            <div class="form-group">
+
+                                <label class="text-bold">Select Study<span class="text-danger">*</span></label><strong id="nostudyselect" style="color:red"></strong>
+                                <select id="orgstudies" onchange="GetInvestiGatorSite(this.value)" class="form-control" required name="StudyId" placeholder="Select A Study">
+                                    <option value=""> -- Select a Study -- </option>
+
+                                </select>
+
+                            </div>
+
+                        }
+                        else
+                        {
+                            <input type="hidden" name="StudyId" value="@ViewBag.StudyId" />
+
+
+                        }
+
+                        <div class="form-group" hidden>
+                            <label class="text-bold"> Primary CRA <span class="text-danger">*</span></label>
+                            <select id="craLists" class="form-control" name="Primary_CRA" placeholder="Select Primary CRA Here">
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label class="text-bold">Investigator Site (Site No)<span class="text-danger">*</span></label>
+                            <select id="investigatorSites" onchange="GetInvestigatorSiteStaffById(this.value)" class="form-control" required name="InvestiGatorSitefId" placeholder="Select Investigator Site Here">
+                                <option value="" disabled> -- Select Investigator Site -- </option>
+
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="text-bold"> Monitoring Visit Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" value="" required name="MonitoringVisitTitle" placeholder="Please enter monitoring visit title">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="text-bold">Visit Type<span class="text-danger">*</span></label>
+                            <select class="form-control" value="" required name="VisitType">
+
+                                <option value="Qualification">Qualification</option>
+                                <option value="Activation">Activation</option>
+                                <option value="Routine">Routine</option>
+                                <option value="Close">Close</option>
+
+                            </select>
+                        </div>
+
+                        @*<div class="form-group">
+                        <label class="text-bold">Protocol Type<span class="text-danger">*</span></label>
+                        <select class="form-control" required name="protocol_type" placeholder="Enter Protocol Type Here"></select>
+
+                        </div>*@
+
+
+                        @*<div class="form-group">
+                        <label class="text-bold"> Description <span class="text-danger">*</span></label>
+                        <textarea onkeyup="limitText(this,40)" class="form-control" required name="Description" placeholder="Enter Description Here"></textarea>
+                        </div>*@
+
+
+
+
+
+
+
+
+                        <div class="form-group">
+                            <label class="text-bold">Visit Date<span class="text-danger">*</span></label>
+                            <input type="date" id="visit_date" class="form-control" required name="VisitDate">
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label class="text-bold">Select To Add Attendies<span class="text-danger">*</span></label>
+
+                            <select id="MonitoringVisit_Attendies" class="select" name="Attendies" data-mdb-clear-button="true" autofocus multiple required>
+
+
+                                @*<option>Qualification</option>
+                                <option>Activation</option>
+                                <option>Routine</option>
+                                <option>Close</option>*@
+
+                            </select>
+                            <hr />
+
+                        </div>
+
+                        <input type="hidden" name="Createdby" value="@ViewBag.UserId" />
+                        <input type="hidden" id="UpdId" name="Id"  />
+
+
+                        <div class="text-right">
+                            <button type="submit" id="subBtn" class="btn btn-primary">Update<i class="icon-database-insert position-right"></i></button>
+                        </div>
+                    </div>
+
+                    @*</div>
+                    </div>
+                    </div>*@
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row m-10">
+    <div class="panel panel-flat text-black">
+        <div class="panel-heading" style="background: #E8ECED; padding:1px !important;">
+            <h2 class="text-center text-black">
+                Search
+            </h2>
+            <div class="heading-elements">
+                <ul class="icons-list">
+                    <li><a data-action="collapse" class="rotate-180"></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body pt-20 pb-20" style="display: none">
+            <div class="row">
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Monitoring Visit Title:</strong></label>
+                        <input type="text" class="form-control" placeholder="Search Name Here" id="searchName" style="background-color:white">
+                    </div>
+                </div>
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Monitoring visit Type:</strong></label>
+                        <select id="visittype" class="form-control" required name="VisitType">
+                            <option value=""> select a value</option>
+
+                            <option value="Qualification">Qualification</option>
+                            <option value="Activation">Activation</option>
+                            <option value="Routine">Routine</option>
+                            <option value="Close">Close</option>
+
+                        </select>
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                        <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group text-right">
+                        <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="panel p-20 m-10">
+
+    <div class="row">
+
+        <center><u><h3>Monitoring Visit List</h3></u></center>
+
+    </div>
+
+    @if (ViewBag.Role != 3)
+    {
+        <div class="row">
+            <div class="col-md-8"></div>
+            <div class="col-md-2 pull-right btn-block">
+                <a href="@Url.Action("AddMonitoringVisit","Studies")" class="btn btn-primary m-5 pull-right">Add New</a>
+            </div>
+        </div>
+
+    }
+
+
+    <input type="hidden" id="way" value="@ViewBag.Way" />
+
+
+    <div class="table-responsive">
+        <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+            <thead class="bg-indigo-800">
+                <tr>
+                    <th class="text-bold" hidden>...</th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Monitoring Visit Title
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Visit Type
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Vist Date
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Organization
+                    </th>
+
+                    @* <th class="text-bold text-center" style="min-width:140px;">
+                    principal Investigator
+                    </th>
+
+                    <th class="text-bold text-center" style="min-width:140px;">
+                    Country
+                    </th>*@
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Study
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Created By
+                    </th>
+                    <th class="text-bold text-center" style="min-width:160px;">
+                        Investigatore site(site no)
+                    </th>
+                    <th class="text-bold text-center" style="min-width:160px;">
+                        View_General_Findings
+                    </th>
+                    <th class="text-bold text-center" style="min-width:130px">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<script>
+
+    var way = $('#way').val();
+
+    loadTable();
+
+    function loadTable(Name, vType) {
+        $('#userTable').DataTable(
+            {
+                "ajax":
+                {
+                    "url": '@Url.Action("GetMonitoringVisitDataTable", "Ajax")',
+                    "type": "POST",
+                    "datatype": "json",
+                    "data": {
+                        id: @ViewBag.StudyId, Name: Name, VisitType: vType,
+                    }
+                },
+                'columns':
+                    [
+                        { "data": "hidden", "name": "0" },
+                        { "data": "monitoringVisitTitle", "name": "MonitoringVisitTitle" },
+                        { "data": "visitType", "name": "VisitType" },
+                        { "data": "visitDate", "name": "VisitDate" },
+                        { "data": "organization", "name": "Organization" },
+                        //{ "data": "investiGatorSiteStaffId", "name": "InvestiGatorSiteStaffId" },
+                        //{ "data": "investiGatorSitefId", "name": "InvestiGatorSitefId" },
+                        { "data": "study", "name": "Study" },
+                        { "data": "createdby", "name": "Createdby" },
+                        { "data": "investiGatorSitefId", "name": "InvestiGatorSitefId" },
+                        { "data": "View_General_Findings", "name": "0" },
+
+                        { "data": "Action", "name": "0" },
+                    ],
+                'columnDefs':
+                    [
+                        {
+                            "targets": 0,
+                            "visible": false,
+                            "searchable": false,
+                            "render": function(data, type, full, meta) {
+                                console.log(full);
+                                return null;
+                            }
+                        },
+                        {
+                            "targets": 1,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.monitoringVisitTitle;
+                            }
+                        }, {
+                            "targets": 2,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.visitType;
+                            }
+                        }, {
+                            "targets": 3,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.visitDate;
+                            }
+                        }, {
+                            "targets": 4,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.organization;
+                            }
+                        },
+                        //{
+                        //    "targets": 5,
+                        //    'className': '',
+                        //    "render": function (data, type, full, meta)
+                        //    {
+                        //        return full.investiGatorSiteStaffId ;
+                        //    }
+                        //},
+                        {
+                            "targets": 5,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.study;
+                            }
+                        },
+                        {
+                            "targets": 6,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.createdby;
+                            }
+                        },
+                        {
+                            "targets": 7,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.investiGatorSitefId;
+                            }
+                        },
+
+                        {
+                            "targets": 8,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return '<a  href="../../Studies/ViewGeneralFindings?monitoringVisitId=' + full.id + '"> View General Findings </a>';
+                            }
+                        },
+
+                        {
+                            "targets": 9,
+                            'className': '',
+                            'sortable': false,
+                            "render": function(data, type, full, meta) {
+
+                                if ('@ViewBag.Role' != 3) {
+
+                                    var x = '';
+                                    var y = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:152px;padding-left:5px !important;">';
+                                    // var viewprof= '<a class="btn btn-sm bg-primary fa fa-eye" href="../Admin/TakeSS?Email='+full.email+'&Pass='+full.password+'" title="View User Profile"></a>'
+                                    //if (full.isActive == 3) {
+                                    //    x = '<button class="btn btn-sm bg-primary fa fa-solid fa-check mr-5" style="padding: 11px 15px;" onclick="AccountActivate(' + full.id + ')" title="Activate Account" ></button>';
+                                    //}
+                                    //else {
+                                    //    if (full.isActive == 2) {
+                                    //        x = '<button class="btn btn-sm bg-primary icon-stats-bars" onclick="PendingApproval(' + full.id + ')" title="Pending Approval"></button>';
+
+                                    //    }
+                                    //    else {
+                                    //        x = '';
+                                    //        y = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:101px;padding-left:5px !important;">'
+                                    //    }
+                                    //}
+                                    return '<ul class="icons-list"> ' +
+                                        '<li class="dropdown" >' +
+                                        '			<a href="#" class="dropdown-toggle" data-toggle="dropdown">' +
+                                        '				<i class="icon-menu9"></i>' +
+                                        '			</a>' +
+                                        y +
+                                        '				<li>' +
+                                        '                   <button class="btn btn-sm bg-info icon-pencil" onclick="updateMonitoringvisit(' + full.id + ')"" title="Edit"></button>' +
+                                        '                   <button class="btn btn-sm bg-danger icon-bin mr-5" onclick="deleteFunction(' + full.id + ')" title="Delete"></button>' +
+                                        //x +
+                                        '               </li>' +
+                                        '			</ul>' +
+                                        '		</li >' +
+                                        '	</ul >';
+
+                                }
+
+                                else {
+                                    var NA = "N/A";
+                                    return NA;
+                                }
+                            }
+                        },
+                    ],
+                "serverSide": "true",
+                "processing": "true",
+                "language":
+                {
+                    "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                    "search": "<span>Search :</span> _INPUT_",
+                    "searchPlaceholder": "Filter Data",
+                    "lengthMenu": "<span>Show :</span> _MENU_",
+                    "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                }
+            });
+    }
+
+
+    function searchTable() {
+        var name = $('#searchName').val();
+        var type = $('#visittype').val();
+
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+
+        loadTable(name, type);
+    }
+
+    function clearSearch() {
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+
+        $('#searchName').val("");
+        $('#visittype').val("");
+
+        loadTable();
+    }
+
+
+    function deleteFunction(id) {
+        $('#confirmModalHeading').text('Warning!');
+        $('#confirmModalHeader').removeClass('bg-success');
+        $('#confirmModalHeader').addClass('bg-danger');
+        $('#confirmModalText').empty();
+        $('#confirmModalText').append('Do you really want to delete this Record?');
+
+        //$("#confirmModalForm").attr("action", "../Studies/DeleteInvestigatorSite?id=" + id + "&way=@ViewBag.Way");
+        $("#confirmModalForm").attr("action", '@Url.Action("DeleteMonitoringVisit","Studies")?id=' + id);
+
+        $('#confirmModal').modal('show');
+    }
+
+    $.ajax({
+        type: 'GET',
+        url: '@Url.Action("GetAllStudies","Ajax")',
+        //dataType: "json",
+        success: function(response) {
+
+
+
+            for (var i = 0; i < response.length; i++) {
+                $('#studies').append($('<option>', {
+                    value: response[i].id,
+                    text: response[i].protocol_Title
+                }));
+            }
+
+        },
+        error: function() {
+            alert("Ajax failed");
+        }
+    });
+
+
+
+</script>
+
+
+
+<script>
+
+    if ('@ViewBag.Role' == '1') {
+
+        debugger;
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllOrganizations","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#Organization_Id').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].name
+                    }));
+                }
+
+            },
+
+            error: function() {
+                alert("Ajax failed");
+            }
+
+        });
+
+    }
+
+
+    if ('@ViewBag.Role' == '1' || '@ViewBag.Role' == '2' || '@ViewBag.Role' == '3' || '@ViewBag.Role' == '5') {
+
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+
+
+                for (var i = 0; i < response.length; i++) {
+
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+    }
+
+
+    function getorganizationstudies(value) {
+
+        console.log("function call");
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            data:
+            {
+                organizationid: value
+            },
+            //dataType: "json",
+            success: function(response) {
+
+                $("#orgstudies").empty();
+                var op = `<option>--please select a value--<option>`;
+                $('#orgstudies').append(op);
+                for (var i = 0; i < response.length; i++) {
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+    }
+
+
+
+
+
+
+</script>
+
+<script>
+
+
+    if ('@ViewBag.Role' == '3') {
+        debugger;
+        GetInvestiGatorSite('@ViewBag.StudyId');
+
+        GetCraByStudyId('@ViewBag.StudyId');
+    }
+    if ('@ViewBag.monitoringId==-1') {
+
+        GetInvestiGatorSite(-1)
+
+    }
+
+    function GetInvestiGatorSite(studyid) {
+
+        debugger;
+        if (studyid == "" || studyid == null) {
+
+            $("#nostudyselect").html("please select a study");
+            $("#nostudyselect").fadeOut(5000);
+        }
+        else {
+            $("#nostudyselect").html("");
+            $.ajax({
+
+                type: 'GET',
+                url: "@Url.Action("GetAllInvestigatorSitesByStudyId","Ajax")",
+                data: {
+                    //id: '@ViewBag.StudyId'
+                    id: studyid
+                },
+                dataType: "json",
+                success: function(response) {
+                    console.log(response);
+                    debugger;
+                    $('#investigatorSites').empty("");
+                    var op = '<option value="" > -- Select Investigator Site -- </option>'
+                    $('#investigatorSites').append(op);
+
+                    for (var i = 0; i < response.length; i++) {
+                        $('#investigatorSites').append($('<option>', {
+                            value: response[i].id,
+                            text: response[i].facility_Institution_Name + " ( " + response[i].site_No + " ) "
+                        }));
+                    }
+
+
+
+
+                },
+                error: function() {
+                    alert("Ajax failed");
+                }
+            });
+
+            if ('@ViewBag.Role' != '3') {
+                GetCraByStudyId(studyid);
+            }
+
+        }
+
+
+    }
+
+    function GetCraByStudyId(studyid) {
+        debugger;
+
+        $.ajax({
+
+            type: 'GET',
+            url: "@Url.Action("GetAllCRAsByStudyId","Ajax")",
+            data: {
+                // id: '@ViewBag.OrganizationId' },
+                id: studyid
+            },
+            dataType: "json",
+            success: function(response) {
+
+                $('#craLists').empty("");
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#craLists').append($('<option>', {
+                        value: response[i].firstName + " " + response[i].lastName,
+                        text: response[i].firstName + " " + response[i].lastName
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+
+
+        });
+
+    }
+
+
+
+</script>
+
+
+<script>
+    function GetInvestigatorSiteStaffById(InvestigatorSiteId,monitoringVisitId) {
+        debugger;
+
+        $.ajax({
+
+            type: 'GET',
+            url: "@Url.Action("GetInvestigatorSiteStaffByInvestgatorId","Ajax")",
+            data: {
+                // id: '@ViewBag.OrganizationId' },
+                Id: InvestigatorSiteId
+            },
+            dataType: "json",
+            success: function(response) {
+
+                //console.log(response);
+
+                if (response.length != 0) {
+                    //$("#MonitoringVisit_Attendies").prop('required',true);
+
+                    $('#MonitoringVisit_Attendies').empty("");
+
+
+                    var ArrayOfStaff = [];
+                    for (var i = 0; i < response.length; i++) {
+                        $('#MonitoringVisit_Attendies').append($('<option>', {
+                            value: response[i].id,
+                            text: response[i].full_Name
+                        }));
+
+
+                           ArrayOfStaff.push(response[i].id);
+
+
+
+                    }
+
+
+                    $("#MonitoringVisit_Attendies").val(ArrayOfStaff);
+                }
+
+                else {
+                    //$("#MonitoringVisit_Attendies").prop('required',false);
+
+                }
+
+
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+
+
+        });
+
+    }
+
+
+</script>
+
+
+<script>
+
+    function updateMonitoringvisit(id) {
+        //////location.href = "Url.Action("UpdateGeneralFinding","Studies")";
+        //window.location.href = '@Url.Action("AddMonitoringVisit", "Studies")?monitoringVisitId=' + id;
+
+         $('#updSubBtn').attr('disabled', false);
+
+        $("#loadImg").show();
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetMonitoringVisitById","Ajax")',
+            dataType: "json",
+            data: {
+                id: id
+            },
+            success: function(response) {
+                if (response == 0) {
+                    alert("Record not found, Please reload the page.");
+                }
+                console.log(response);
+
+                //$("#updId").val(response.id);
+                var vDate = response.visitDate;
+                var new_date = vDate.split("T");
+                var Visit_Date = new_date[0];
+
+                $("[name='Id']").val(response.id);
+                 $("[name='OrganizationId']").val(response.organizationId);
+                 $("[name='StudyId']").val(response.studyId);
+                $("[name='InvestiGatorSitefId']").val(response.investiGatorSitefId);
+                $("[name='MonitoringVisitTitle']").val(response.monitoringVisitTitle);
+                $("[name='VisitDate']").val(Visit_Date);
+                $("[name='VisitType']").val(response.visitType);
+                GetInvestigatorSiteStaffById(response.investiGatorSitefId,id);
+                //GetMonitoringVisitAttendiesById(response.id);
+
+                $("#loadImg").hide();
+                $("#updateModal").modal('show');
+            },
+            error: function() {
+                $("#loadImg").hide();
+
+                alert("ajax Failed");
+            }
+        });
+
+
+
+
+        //$("#updateModal").modal('show');
+
+    }
+
+
+    validdates();
+    function validdates() {
+        debugger;
+        $('#q_date').attr('min', new Date($.now()).toISOString().slice(0, 16));
+
+
+    }
+
+
+</script>

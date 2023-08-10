@@ -1,0 +1,1819 @@
+﻿@using ClinicalWebApplication.Models
+@using Microsoft.Data.SqlClient;
+@inject SqlConnection de
+@using ClinicalWebApplication.BL
+@using System.Security.Claims;
+@{
+    ViewBag.Title = "Add General Finding";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var Userid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+    var CurrentUserRecord = new UserBL().GetActiveUserById(Convert.ToInt32(Userid), de);
+
+}
+
+<div class="p-20">
+
+    <div class="row">
+        <form action="@Url.Action("PostAddGeneralFinding", "Studies")" method="post" enctype="multipart/form-data">
+
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-flat">
+                        <div class="panel-heading">
+
+                            <h2 class="panel-title text-center text-bold">Add General Finding</h2>
+
+                        </div>
+
+                        <div class="panel-body">
+
+                            <legend class="text-bold text-uppercase"><span class="text-danger">*</span> Fields are mandatory to fill</legend>
+
+                            @if (ViewBag.Role == 1)
+                            {
+                                <div class="form-group">
+                                    <label class="text-bold">Select Organization<span class="text-danger">*</span></label>
+                                    <select id="Organization_Id" onchange="getorganizationstudies(this.value)" class="form-control" name="OrganizationId" required>
+                                        <option disabled>--select an option--</option>
+                                        <option hidden></option>
+
+                                    </select>
+                                </div>
+
+                            }
+
+
+                            else
+                            {
+                                <input type="hidden" name="OrganizationId" value="@ViewBag.organizationid" />
+                            }
+
+                            @if (ViewBag.Role != 3)
+                            {
+                                <div class="form-group">
+
+                                    <label class="text-bold">Select Study<span class="text-danger">*</span></label><strong id="nostudyselect" style="color:red"></strong>
+                                    <select id="orgstudies" onchange="GetInvestiGatorSite(this.value)" class="form-control" required name="StudyId" placeholder="Select A Study">
+                                        <option value=""> -- Select a Study -- </option>
+
+                                    </select>
+
+                                </div>
+
+                            }
+                            else
+                            {
+                                <input type="hidden" name="StudyId" value="@ViewBag.StudyId" />
+
+
+                            }
+
+                            <div class="form-group" hidden>
+                                <label class="text-bold"> Primary CRA <span class="text-danger">*</span></label>
+                                <select id="craLists" class="form-control" name="Primary_CRA" placeholder="Select Primary CRA Here">
+                                </select>
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <label class="text-bold">Investigator Site (Site No)<span class="text-danger">*</span></label>
+                                <select id="investigatorSites" onchange="GetInvestigatorSiteStaffById(this.value)" class="form-control" required name="InvestiGatorSitefId" placeholder="Select Investigator Site Here">
+                                    <option value="" disabled> -- Select Investigator Site -- </option>
+
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label class="text-bold">Select Monitoring visit<span class="text-danger">*</span></label>
+
+                                <select id="MonitoringVisit" class="form-control" name="MonitoringVisitId" data-mdb-clear-button="true" autofocus required>
+
+
+                                    @*<option>Qualification</option>
+                                    <option>Activation</option>
+                                    <option>Routine</option>
+                                    <option>Close</option>*@
+
+                                </select>
+                                <hr />
+
+                            </div>
+
+
+
+
+                            <div class="form-group">
+                                <label class="display-block text-semibold"><b>1.</b>Did a meeting occur with the investigator?</label>
+                                <input hidden value="Did a meeting occur with the investigator?" name="Question" />
+                                <label for="Questionstatus12" class="radio-inline">
+                                    <input id="Questionstatus12" type="radio" name="Questionstatus" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label for="Questionstatus12" class="radio-inline">
+                                    <input type="radio" name="Questionstatus" id="Questionstatus12" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" value="" class="form-control" name="Dateoccur">
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+
+                            </div>
+
+
+                            <h5>2.Protocol</h5>
+                            <div class="form-group">
+                                <label class="display-block text-semibold"><b>a.</b> Does the site adhere to the protocol, study manuals, and guidelines, and are they aware of any critical study updates if applicable?</label>
+                                <input hidden value="Does the site adhere to the protocol, study manuals, and guidelines, and are they aware of any critical study updates if applicable?" name="Question" />
+                                <label for="Questionstatus1" class="radio-inline">
+                                    <input name="Questionstatus1" id="Questionstatus1" type="radio" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label for="Questionstatus1" class="radio-inline">
+                                    <input name="Questionstatus1" id="Questionstatus1" type="radio" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" value="" class="form-control" name="Dateoccur">
+                                    
+
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+                            <h5>3.Personnel</h5>
+                            <div class="form-group">
+                                <input hidden value="Is the level of oversight provided by the Principal Investigator sufficient and in compliance with ICH GCP requirements?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>a.</b> Is the level of oversight provided by the Principal Investigator sufficient and in compliance with ICH GCP requirements?
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="Questionstatus2" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input name="Questionstatus2" type="radio" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)"  class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <input hidden value="Are the staff at the investigator site qualified and trained to perform their delegated responsibilities?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>b.</b>  Are the staff at the investigator site qualified and trained to perform their delegated responsibilities?
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q4" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q4" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+                                    
+
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <input hidden value="Since the previous monitoring visit, have all changes in the Principal Investigator and investigator site staff been documented?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>c.</b>  Since the previous monitoring visit, have all changes in the Principal Investigator and investigator site staff been documented?
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" onclick="ShowFindings(this)" name="q5" class="styled" value="yes" checked>
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" onclick="ShowFindings(this)" name="q5" value="No" class="styled">
+                                    No
+                                </label>
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+                            <h5>4.Subject Data</h5>
+                            <div class="form-group">
+                                <input hidden value="Were informed consent forms found to be complete, correctly signed, and did they include evidence of appropriate informed consent discussions and documentation prior to enrollment? If applicable, was re-consent obtained in a timely manner?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>a.</b>  Were informed consent forms found to be complete, correctly signed, and did they include evidence of appropriate informed consent discussions and documentation prior to enrollment? If applicable, was re-consent obtained in a timely manner?
+
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q6" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q6" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+
+
+                            <div class="form-group">
+                                <input hidden value=" Was the quality of source documentation (including subject records, lab reports, and electronic data capture systems, etc.) deemed adequate during this visit?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>b.</b> Was the quality of source documentation (including subject records, lab reports, and electronic data capture systems, etc.) deemed adequate during this visit?
+
+
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q7" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q7" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+                            <h5>5.Safety</h5>
+                            <div class="form-group">
+                                <input hidden value="Are adverse events, serious adverse events, toxicities, events of special interest, study outcomes, and study endpoints adequately recorded in source documents or electronic data capture systems as required by the protocol?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>a.</b>  Are adverse events, serious adverse events, toxicities, events of special interest, study outcomes, and study endpoints adequately recorded in source documents or electronic data capture systems as required by the protocol?
+
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q8" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q8" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+
+                            <div class="form-group">
+                                <input hidden value="Have all serious adverse events and endpoints been reported to the sponsor as required by the protocol, ICH GCP, and regulatory requirements?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>b.</b>  Have all serious adverse events and endpoints been reported to the sponsor as required by the protocol, ICH GCP, and regulatory requirements?
+
+
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q9" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q9" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+                            <h5>6.Investigational Product</h5>
+                            <div class="form-group">
+                                <input hidden value="Was the storage, management, and accountability of investigational product performed in accordance with the protocol, investigators brochure, and other guidelines?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>a.</b> Was the storage, management, and accountability of investigational product performed in accordance with the protocol, investigators brochure, and other guidelines?
+
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q10" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q10" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+
+
+                            <div class="form-group">
+                                <input hidden value="Were dosing assignments, preparation, adjustments, and subject compliance management for investigational product documented in accordance with the protocol, investigator brochure, pharmacy manual, and other applicable guidelines?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>b.</b> Were dosing assignments, preparation, adjustments, and subject compliance management for investigational product documented in accordance with the protocol, investigator brochure, pharmacy manual, and other applicable guidelines?
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q11" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q11" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+
+
+
+
+                            <div class="form-group">
+                                <input hidden value="Is the investigational product continuing to remain blinded as required by the protocol?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>c.</b> Is the investigational product continuing to remain blinded as required by the protocol?
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q12" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q12" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+
+
+                            <h5>7.Study Supplies</h5>
+                            <div class="form-group">
+                                <input hidden value="Is the site managing the study supplies and laboratory materials (e.g., related specimens, imaging examinations) adequately and in a proper manner?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>a.</b> Is the site managing the study supplies and laboratory materials (e.g., related specimens, imaging examinations) adequately and in a proper manner?
+
+
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q13" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q13" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+                            <h5>8.Study Documentation</h5>
+                            <div class="form-group">
+                                <input hidden value="Was the investigator site file found to be complete and without any discrepancies in filing or management?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>a.</b> Was the investigator site file found to be complete and without any discrepancies in filing or management?
+
+
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q14" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q14" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+
+                            </div>
+
+
+                            <h5>9.Facilities/Equipment </h5>
+                            <div class="form-group">
+                                <input hidden value="Are the site facilities, equipment, and systems sufficient and in compliance with the protocol, ICH GCP, and applicable regulations?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>a.</b> Are the site facilities, equipment, and systems sufficient and in compliance with the protocol, ICH GCP, and applicable regulations?
+
+
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q15" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q15" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+                            <h5>10.Regulatory / Ethics</h5>
+                            <div class="form-group">
+                                <input hidden value=" Is regulatory and ethics reporting, including safety information, progress reports, and updated protocol and investigators brochure information, being completed as required and managed in accordance with local regulations and study guidelines?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>a.</b> Is regulatory and ethics reporting, including safety information, progress reports, and updated protocol and investigators brochure information, being completed as required and managed in accordance with local regulations and study guidelines?
+
+
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q16" onclick="ShowFindings(this)" value="yes" checked class="styled">
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q16" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+
+                            <h5>11.Summary</h5>
+                            <div class="form-group">
+                                <input hidden value="Are the PI and site staff qualified and is the site able to perform the study according to the protocol in the monitors opinion?" name="Question" />
+
+                                <label class="display-block text-semibold">
+                                    <b>a.</b> Are the PI and sites staff qualified and is the site able to perform the study according to the protocol in the monitor's opinion?
+
+
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="q17" onclick="ShowFindings(this)" value="yes" class="styled" checked>
+                                    Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="q17" onclick="ShowFindings(this)" value="No" class="styled">
+                                    No
+                                </label>
+                                <div class="form-group showfindings" hidden>
+                                    <label class="text-bold">Subject<span class="text-danger">*</span></label>
+                                    <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+                                    <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur">                                       
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+                                    <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Significant">Significant</option>
+                                        <option value="Not Significant">Not Significant</option>
+
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+                                    <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Documentation">Documentation</option>
+
+                                    </select>
+                                    <hr />
+                                    <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+                                    <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Description<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here"></textarea>
+
+                                </div>
+                            </div>
+
+
+
+
+                            <input type="hidden" name="Createdby" value="@ViewBag.UserId" />
+                            @*<input type="hidden" name="StudyId" value="@ViewBag.UserId" />*@
+
+
+                            <div class="text-right">
+                                <button type="button" onclick="showreview(this.value)" value="0" id="addBtn" class="btn btn-primary"><i class="fa fa-plus" aria-hidden="true"></i>Add</button>
+                            </div>
+
+
+                            @*commentsandreviews*@
+
+
+
+                            <div class="form-group">
+
+                                <div class="form-group mt-3 showfindings" id="userreview_div" hidden>
+
+                                    <div class="panel-heading">
+
+                                        <h2 class="panel-title text-center text-bold">Findings Review</h2>
+
+                                    </div>
+                                    <label class="text-bold">UserName</label>
+                                    <input type="text" id="subject" value="@CurrentUserRecord.FirstName @CurrentUserRecord.LastName " readonly onkeyup="limitText(this,40)" class="form-control" name="" placeholder="Enter Subject Here">
+                                    <label class="text-bold">Date<span class="text-danger">*</span></label>
+                                    <input type="date" value="@DateTime.Now.ToShortDateString()" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="ReviewDate">
+
+                                    <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+                                    <select id="status" class="form-control" name="FindingStatus" data-mdb-clear-button="true" autofocus>
+
+
+
+                                        <option value="Complete">Complete</option>
+                                        <option value="Revision Required">Revision Required</option>
+
+
+                                    </select>
+                                    <hr />
+
+
+
+                                    <label class="text-bold">Comments<span class="text-danger">*</span></label>
+                                    <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="ReviewComments" placeholder="Enter Finding Description Here"></textarea>
+
+
+
+                                    <div class="text-right mt-5" style="padding-top: 12px;">
+                                        <button type="button" id="cnacelBtn" onclick="showreview(this.value)" value="1" class="btn btn-primary">Cancel</button>
+
+                                        <button type="submit" id="subBtn" class="btn btn-primary">Submit <i class="icon-database-insert position-right"></i></button>
+                                    </div>
+                                </div>
+
+
+
+
+
+                            </div>
+
+
+
+                            @*commentsandreviews*@
+
+                        </div>
+
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+
+
+            </div>
+
+
+
+
+
+        </form>
+    </div>
+
+</div>
+<script>
+
+    if ('@ViewBag.Role' == '1') {
+
+        debugger;
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllOrganizations","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#Organization_Id').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].name
+                    }));
+                }
+
+            },
+
+            error: function() {
+                alert("Ajax failed");
+            }
+
+        });
+
+    }
+
+
+    if ('@ViewBag.Role' == '2' || '@ViewBag.Role' == '5') {
+
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+
+
+                for (var i = 0; i < response.length; i++) {
+
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+    }
+
+
+    function getorganizationstudies(value) {
+
+        console.log("function call");
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            data:
+            {
+                organizationid: value
+            },
+            //dataType: "json",
+            success: function(response) {
+
+
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+    }
+
+
+</script>
+
+<script>
+
+    //  $.ajax({
+
+    //    type: 'GET',
+    //    url: "@Url.Action("GetAllInvestigatorSitesByStudyId","Ajax")",
+    //    data: {
+
+    //        id: '@ViewBag.StudyId'
+    //        //id: studyid
+    //                   },
+    //    dataType: "json",
+    //    success: function(response) {
+    //        console.log(response);
+
+    //        $('#investigatorSites').empty("");
+    //        for (var i = 0; i < response.length; i++) {
+    //            $('#investigatorSites').append($('<option>', {
+    //                value: response[i].id,
+    //                text: response[i].facility_Institution_Name +" ( " + response[i].site_No +" ) "
+    //            }));
+    //        }
+
+    //    },
+    //    error: function() {
+    //        alert("Ajax failed");
+    //    }
+    //});
+    if ('@ViewBag.Role' == '3') {
+        debugger;
+        GetInvestiGatorSite('@ViewBag.StudyId');
+
+        GetCraByStudyId('@ViewBag.StudyId');
+    }
+
+    function GetInvestiGatorSite(studyid) {
+
+        debugger;
+        if (studyid == "" || studyid == null) {
+
+            $("#nostudyselect").html("please select a study");
+            $("#nostudyselect").fadeOut(5000);
+        }
+        else {
+            $("#nostudyselect").html("");
+            $.ajax({
+
+                type: 'GET',
+                url: "@Url.Action("GetAllInvestigatorSitesByStudyId","Ajax")",
+                data: {
+                    //id: '@ViewBag.StudyId'
+                    id: studyid
+                },
+                dataType: "json",
+                success: function(response) {
+                    console.log(response);
+                    debugger;
+                    $('#investigatorSites').empty("");
+                    var op = '<option value="" > -- Select Investigator Site -- </option>'
+                    $('#investigatorSites').append(op);
+
+                    for (var i = 0; i < response.length; i++) {
+                        $('#investigatorSites').append($('<option>', {
+                            value: response[i].id,
+                            text: response[i].facility_Institution_Name + " ( " + response[i].site_No + " ) "
+                        }));
+                    }
+
+
+
+
+                },
+                error: function() {
+                    alert("Ajax failed");
+                }
+            });
+
+            if ('@ViewBag.Role' != '3') {
+                GetCraByStudyId(studyid);
+            }
+
+        }
+
+
+    }
+
+    function GetCraByStudyId(studyid) {
+        debugger;
+
+        $.ajax({
+
+            type: 'GET',
+            url: "@Url.Action("GetAllCRAsByStudyId","Ajax")",
+            data: {
+                // id: '@ViewBag.OrganizationId' },
+                id: studyid
+            },
+            dataType: "json",
+            success: function(response) {
+
+                $('#craLists').empty("");
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#craLists').append($('<option>', {
+                        value: response[i].firstName + " " + response[i].lastName,
+                        text: response[i].firstName + " " + response[i].lastName
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+
+
+        });
+
+    }
+
+
+
+</script>
+
+<script>
+    function GetInvestigatorSiteStaffById(InvestigatorSiteId) {
+        debugger;
+
+        $.ajax({
+
+            type: 'GET',
+            url: "@Url.Action("GetMonitoringByInvestigatorSiteId","Ajax")",
+            data: {
+                // id: '@ViewBag.OrganizationId' },
+                Id: InvestigatorSiteId
+            },
+            dataType: "json",
+            success: function(response) {
+
+                //console.log(response);
+
+                if (response.length != 0) {
+                    //$("#MonitoringVisit_Attendies").prop('required',true);
+
+                    $('#MonitoringVisit').empty("");
+
+                    for (var i = 0; i < response.length; i++) {
+                        $('#MonitoringVisit').append($('<option>', {
+                            value: response[i].id,
+                            text: response[i].monitoringVisitTitle
+                        }));
+                    }
+
+                }
+
+                else {
+                    //$("#MonitoringVisit_Attendies").prop('required',false);
+
+                }
+
+
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+
+
+        });
+
+    }
+
+
+</script>
+
+
+
+<script>
+
+
+    validdates();
+    function validdates() {
+        debugger;
+        //$('#Ethics_Date').attr('min', new Date($.now()).toISOString().slice(0, 10));
+        $('#sponsor_date').attr('min', new Date($.now()).toISOString().slice(0, 10));
+
+
+    }
+
+
+
+
+</script>
+<script>
+    //function ShowFindings(value) {
+    //    debugger;
+    //    var checked = $(value);
+
+    //    var checkedval = checked.val();
+
+    //     var findingsdiv = checked.closest(".form-group");
+
+
+    //    var NewFindingsDiv = `<div class="form-group showfindings">
+    //                                <label class="text-bold">Subject<span class="text-danger">*</span></label>
+    //                                <input type="text" id="subject" onkeyup="limitText(this,40)" class="form-control" name="Subject" placeholder="Enter Subject Here" required >
+    //                                <label class="text-bold">Date Occured<span class="text-danger">*</span></label>
+    //                                <input type="date" id="date_occur" onkeyup="limitText(this,40)" class="form-control" name="Dateoccur" required>
+
+    //                                <label class="text-bold">Status<span class="text-danger">*</span></label>
+
+    //                                <select id="status" class="form-control" name="Status" data-mdb-clear-button="true" autofocus required>
+
+
+
+    //                                    <option value="Open">Open</option>
+    //                                    <option value="Closed">Closed</option>
+
+
+    //                                </select>
+    //                                <hr />
+    //                                <label class="text-bold">Significance<span class="text-danger">*</span></label>
+
+    //                                <select id="Significance" class="form-control" name="Significance" data-mdb-clear-button="true" autofocus required>
+
+
+    //                                    <option value="Significant">Significant</option>
+    //                                    <option value="Not Significant">Not Significant</option>
+
+
+    //                                </select>
+    //                                <hr />
+    //                                <label class="text-bold">Category<span class="text-danger">*</span></label>
+
+    //                                <select id="category" class="form-control" name="Category" data-mdb-clear-button="true" autofocus required>
+
+
+    //                                     <option value="Documentation">Documentation</option>
+
+    //                                </select>
+    //                                <hr />
+    //                                <label class="text-bold">Action/Resolution<span class="text-danger">*</span></label>
+    //                                <input type="text" id="Action_resolution" onkeyup="limitText(this,40)" class="form-control" name="Action_resolution" placeholder="Enter Action/Resolution" required>
+    //                                <label class="text-bold">Description<span class="text-danger">*</span></label>
+    //                                <textarea onkeyup="limitText(this,40)" id="desc" class="form-control" name="Description" placeholder="Enter Finding Description Here" required></textarea>
+
+    //                            </div>`;
+
+
+    //    if (checkedval == "yes") {
+    //        //$(findingsdiv).hide();
+    //        var findings_div = checked.closest(".form-group").find(".showfindings");
+    //        //$(findings_div).remove();
+    //        $(findings_div).hide();
+
+
+
+    //        //$.each(takeAllinputs, function(index, item) {
+
+    //        //    var inp = $(item).prop("required", false);
+    //        //});
+    //    }
+    //    else {
+
+    //        $(findingsdiv).append(NewFindingsDiv);
+
+    //        //$.each(takeAllinputs, function(index, item) {
+    //        //    var inp = $(item).prop("required", true);
+    //        //});
+    //    }
+
+
+    //}
+
+    function ShowFindings(value) {
+        debugger;
+        var checked = $(value);
+
+        var checkedval = checked.val();
+
+        var findingsdiv = checked.closest(".form-group").find(".showfindings");
+
+        var takeAllinputs = $(findingsdiv).find(".form-control");
+
+        console.log("inputs divs: ", takeAllinputs);
+
+
+        if (checkedval == "yes") {
+            $(findingsdiv).hide();
+
+            //var dateoccursinput = `<input type="datetime" hidden id="date_occurs" onkeyup="limitText(this,40)" value="@DateTime.Now" class="form-control" name="Dateoccur">`
+
+            //$(findingsdiv).append(dateoccursinput);
+
+            $.each(takeAllinputs, function(index, item) {
+
+                var inp = $(item).prop("required", false);
+            });
+        }
+        else {
+
+            //$(findingsdiv).append(NewFindingsDiv);
+            $(findingsdiv).show();
+            //$(date_occured).remove();
+
+
+
+
+            $.each(takeAllinputs, function(index, item) {
+                var inp = $(item).prop("required", true);
+            });
+        }
+
+
+    }
+
+</script>
+
+<script>
+    function showreview(val) {
+        if (val == 1) {
+            $("#userreview_div").hide();
+            $("#addbtn").show();
+
+            $("#cnacelBtn").hide();
+            $("#subBtn").hide();
+
+
+        }
+        else {
+
+            $("#userreview_div").show();
+            $("#addbtn").hide();
+
+
+
+
+
+
+            $("#cnacelBtn").show();
+            $("#subBtn").show();
+
+        }
+
+
+    }
+
+               //appendinghiddendivs();
+               //function appendinghiddendivs()
+               //{
+
+               //    //hidden findings fields
+               //     for (var i = 0; i < 17; i++)
+
+               //     {
+               //         var hiddendiv=`<div>
+               //         <input type="hidden" name="Category" value="null" />
+               //  <input type="datetime-local" hidden name="Dateoccur" value="null" />
+               //  <input type="hidden" name="Status" value="null" />
+               //  <input type="hidden" name="Significance" value="null" />
+               //  </div>`
+
+
+               //         $('#hiddenfindingsfields').append(hiddendiv);
+
+               //     }
+
+
+
+               //     //hidden findings fields
+
+               //}
+
+
+</script>

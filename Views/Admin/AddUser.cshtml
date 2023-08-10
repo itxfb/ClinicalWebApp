@@ -1,0 +1,295 @@
+﻿@{
+    if(ViewBag.cat==3)
+    {
+        ViewBag.Title = "Add Study Member";
+    }
+    else if(ViewBag.cat ==4)
+    {
+        ViewBag.Title = "Add Auditor";
+    }
+    else if(ViewBag.cat ==5)
+    {
+        ViewBag.Title = "Add CRA";
+    }
+    else
+    {
+        ViewBag.Title = "Add Admin";
+    }
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="p-20">
+
+    <div class="row">
+        <form action="@Url.Action("PostAddUser", "Admin")" method="post">
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-flat">
+                        <div class="panel-heading">
+                            @if (ViewBag.cat == 3)
+                            {
+                                <h2 class="panel-title text-center text-bold">Add Study Member</h2>
+                            }
+                            else if(ViewBag.cat==4)
+                            {
+                                 <h2 class="panel-title text-center text-bold">Add Auditor</h2>
+                            }
+                            else if(ViewBag.cat==5)
+                            {
+                                 <h2 class="panel-title text-center text-bold">Add Clinical Research Associate</h2>
+                            } 
+                            else
+                            {
+                                 <h2 class="panel-title text-center text-bold">Add Admin</h2>
+                            }
+                        </div>
+
+                        <div class="panel-body">
+                            <legend class="text-bold text-uppercase"><span class="text-danger">*</span> Fields are mandatory to fill</legend>
+
+
+                            <div class="form-group">
+                                <label class="text-bold">First Name <span class="text-danger">*</span></label>
+                                <input type="text" onkeyup="limitText(this,40)" class="form-control" required name="FirstName" placeholder="Enter First Name Here">
+                            </div>
+
+                             <div class="form-group">
+                                <label class="text-bold">Last Name <span class="text-danger">*</span></label>
+                                <input type="text" onkeyup="limitText(this,40)" class="form-control" required name="LastName" placeholder="Enter Last Name Here">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="Email" onkeydown="limitText(this,40)" class="form-control" onkeyup="validateEmail(this.value)" placeholder="Add Email Here" required>
+                                <span class="text-danger" id="emailErrMsg"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold ">Password: <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" autocomplete="new-password" placeholder="Your Password" required name="Password" id="password">
+                                    <span class="input-group-btn" style="padding-left:0px;">
+                                        <button class="btn btn-default" onclick="ShowPasswords(1)" type="button" style="display:block" id="SignupShowPassword">Show</button>
+                                        <button class="btn btn-default" onclick="ShowPasswords(1)" type="button" style="display:none" id="SignupHidePassword">Hide</button>
+                                    </span>
+                                </div>
+                            </div>
+                             
+
+
+                            @if (ViewBag.cat == 2 || ViewBag.Role == 1)
+                            {
+                                <div class="form-group">
+                                    <label class="text-bold">Organization<span class="text-danger">*</span></label>
+                                    <select id="organizations" onchange="getorganizationstudies(this.value)" class="form-control" name="OrganizationId" placeholder="Select Organization" required>
+                                        <option value="">--please select a value--</option>
+
+
+
+                                    </select>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" name="OrganizationId" value="@ViewBag.Organization"/>
+
+                            }
+
+
+                            
+                                @if(ViewBag.cat!=2)
+                                {
+
+                                    <div class="form-group">
+
+                                    <label class="text-bold">Study to Assign<span class="text-danger">*</span></label>
+
+                                    <select id="studies" class="select" name="studies" placeholder="Select Study" data-mdb-placeholder="Select a Study" data-mdb-clear-button="true" autofocus multiple required>
+
+                                    </select>
+                                    <hr />
+                                    
+                                    </div>
+                                }
+
+                                 <input type="hidden" name="Role" value="@ViewBag.cat"/>
+
+                                 <input type="hidden" name="CreatedBy" value="@ViewBag.AdminId" />
+
+                            <div class="text-right">
+                                <button type="submit" id="subBtn" class="btn btn-primary">Add <i class="icon-database-insert position-right"></i></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+
+
+    GetAllOrganization();
+
+    function validateEmail(email) {
+        if (email != "") {
+            $.ajax({
+                type: 'POST',
+                //url: "../Ajax/ValidateEmail",
+                url: "@Url.Action("ValidateEmail","Ajax")",
+                dataType: "json",
+                data: {
+                    email: email, id: -1
+                },
+                success: function (response) {
+                    if (response == true) {
+                        $('#emailErrMsg').text("");
+                        $('#subBtn').attr('disabled', false);
+                    }
+                    else {
+                        $('#emailErrMsg').text("Email already exsist");
+                        $('#subBtn').attr('disabled', true);
+                    }
+                },
+                error: function () {
+                    $('#emailErrMsg').text("");
+                    $('#subBtn').attr('disabled', false);
+                    alert("Ajax failed");
+                }
+            });
+        }
+
+    }
+
+    function validateUsername(username) {
+            if (username != "") {
+                $.ajax({
+                    type: 'POST',
+                    //url: "../Ajax/ValidateUsername",
+                    url: "@Url.Action("ValidateUsername","Ajax")",
+                    dataType: "json",
+                    data: {
+                        username: username, id: -1
+                    },
+                    success: function (response) {
+                        if (response == true) {
+                            $('#nameErrMsg').text("");
+                            $('#subBtn').attr('disabled', false);
+                        }
+                        else {
+                            $('#nameErrMsg').text("Username already exsist");
+                            $('#subBtn').attr('disabled', true);
+                        }
+                    },
+                    error: function () {
+                        $('#nameErrMsg').text("");
+                        $('#subBtn').attr('disabled', false);
+                        alert("Ajax failed");
+                    }
+                });
+            }
+        }
+
+
+        function GetAllOrganization() {
+           
+                $.ajax({
+                    type: 'GET',
+                    url: "../Ajax/GetAllOrganizations",
+                    dataType: "json",
+                    success: function (response) {
+                      
+
+                        $("#organizations").empty();
+                        var op = ` <option value="">--please select a value--</option>`;
+                        $('#organizations').append(op);
+                        for (var i = 0; i < response.length; i++) { 
+                            $('#organizations').append($('<option>', { 
+                                value: response[i].id,
+                                text : response[i].name 
+                            }));
+                        }
+                        
+                    },
+                    error: function () {
+                        alert("Ajax failed");
+                    }
+                });
+        }
+
+        function getorganizationstudies(value) {
+
+        console.log("function call");
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            data:
+            {
+                organizationid: value
+            },
+            //dataType: "json",
+            success: function(response) {
+
+                $('#studies').empty();
+
+                
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#studies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+    }
+
+
+    if ('@ViewBag.Role' != '1') {
+
+        $.ajax({
+            type: 'GET',
+            // url: "../Ajax/GetAllStudies",
+            url: "@Url.Action("GetAllStudies","Ajax")",
+            dataType: "json",
+            success: function(response) {
+
+                $('#studies').empty();
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#studies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+
+                }
+
+
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+    }
+
+
+</script>
+
+@*<script>
+    //Used to handle Sidebar links Activeness
+    $('#manageUserTab1').addClass('active');
+
+</script>*@

@@ -1,0 +1,721 @@
+﻿@{
+
+    ViewBag.Title = "View Protocol Deviation";
+
+}
+
+<style>
+    .table > tbody > tr > td {
+        padding: 5px !important;
+    }
+</style>
+
+
+<div class="modal fade" id="updateModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="text-center text-bold">Update Protocol Deviation</h5>
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form action="@Url.Action("PostUpdateProtocolDeviations","Studies")" method="post" enctype="multipart/form-data">
+
+                    <input type="hidden" name="Id" id="updId" />
+                    <input type="hidden" name="way" value="@ViewBag.Way" />
+
+
+                    <div class="form-group">
+                        <label class="text-bold"> Primary CRA <span class="text-danger">*</span></label>
+                        @*<input type="text" onkeyup="limitText(this,40)" class="form-control" required name="Primary_CRA" placeholder="Enter Primary CRA Name Here">*@
+                        <select id="craLists" class="form-control" required name="Primary_CRA" placeholder="Select Primary CRA Here">
+                                   
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold"> Subject <span class="text-danger">*</span></label>
+                        <input type="number" min="0" onkeyup="limitText(this,40)" class="form-control" required name="Subject" placeholder="Enter Subject Number Here">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold"> Subject Status<span class="text-danger">*</span></label>
+                        <select class="form-control" name="Subject_Status" placeholder="Enter Subject Status Here">
+                                    <option>Complete</option>
+                                    <option>Early Terminated</option>
+                                    <option>Enrolled</option>
+                                    <option>Randomized</option>
+                                    <option>Screen Failed</option>
+                                    <option>Screened</option>
+
+
+                        </select>
+                    </div>
+
+                   @* <div class="form-group">
+                        <label class="text-bold">Protocol Type</label>
+                        <select class="form-control" name="protocol_type" placeholder="Enter Protocol Type Here"></select>
+
+                    </div>*@
+
+
+                    <div class="form-group">
+                        <label class="text-bold"> Description<span class="text-danger">*</span></label>
+                        <textarea onkeyup="limitText(this,40)" class="form-control" name="Description" placeholder="Enter Description Here" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Action Resolution<span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="Action_Resolution" placeholder="Enter Action Resolution Here" required></textarea>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="text-bold">Subject Visit<span class="text-danger">*</span></label>
+                        @*<select class="form-control" name="Subject_Visit" placeholder="Select Subject Visit Here"></select>*@
+                        <input type="text" onkeyup="limitText(this,40)" class="form-control" required name="Subject_Visit" placeholder="Enter A Text Regarding Your Subject Visit">
+
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Significance<span class="text-danger">*</span></label>
+                        <select class="form-control" name="Significance" placeholder="Select Significance Here" required>
+
+                            <option>Significant</option>
+                            <option>Not Significant</option>
+
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Sponsor Notified<span class="text-danger">*</span></label>
+                        <input type="date" onkeyup="limitText(this,40)" class="form-control" name="Sponsor_Notified" placeholder="Select Sponsor_Notified Here" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Reportable to Ethics<span class="text-danger">*</span></label>
+                        <select class="form-control" name="Reportable_to_Ethics" placeholder="Select Reportable to Ethics Here" required>
+                            <option>-- Select an Option --</option>
+                            <option>Yes</option>
+                            <option>No</option>
+                        </select>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="text-bold">Ethics Notified<span class="text-danger">*</span></label>
+                        <select class="form-control" required name="Ethics_Notified" placeholder="Select Ethics Notified Here">
+                            <option>-- Select an Option --</option>
+                            <option>Yes</option>
+                            <option>No</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Reported by Investigator Site<span class="text-danger">*</span></label>
+                        <select class="form-control" name="Reported_by_Investigator_Site" placeholder="Select Reported by Investigator Site Here" required>
+                            <option>-- Select an Option --</option>
+                            <option>Yes</option>
+                            <option>No</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" hidden>
+                       
+                           <label class="text-bold">Select Study<span class="text-danger">*</span></label><strong id="nostudyselect" style="color:red"></strong>
+                            <select id="orgstudies"  @*onchange="GetInvestiGatorSites(this.value)"*@ class="form-control" required name="StudyId" placeholder="Select A Study" disabled>
+                                <option value=""> -- Select a Study -- </option>   
+
+                            </select>
+                            
+                        </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Investigator Site (Site No)<span class="text-danger">*</span></label>
+                        <select id="investigatorsitesselect" class="form-control" required name="InvestigatorSiteId" placeholder="Select Investigator Site Here">
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="CreatedBy" value="@ViewBag.UserId" />
+                    <input type="hidden" name="StudyId" value="@ViewBag.StudyId" />
+
+                    <div class="modal-footer">
+                        <button type="submit" value="submit" class="btn btn-primary" id="updSubBtn">Update</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row m-10">
+    <div class="panel panel-flat text-black">
+        <div class="panel-heading" style="background: #E8ECED; padding:1px !important;">
+            <h2 class="text-center text-black">
+                Search
+            </h2>
+            <div class="heading-elements">
+                <ul class="icons-list">
+                    <li><a data-action="collapse" class="rotate-180"></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body pt-20 pb-20" style="display: none">
+            <div class="row">
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+
+                    <div class="form-group">
+                        <label class="text-bold"> Primary CRA</label>
+                        <input type="text" id="primary_cra" onkeyup="limitText(this,40)" class="form-control" required name="Primary_CRA" placeholder="Enter Primary CRA Name Here">
+                    </div>
+
+                </div>
+
+               @* <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label class="text-bold"> Subject</label>
+                        <input type="number" min="0" onkeyup="limitText(this,40)" class="form-control" required name="Subject" placeholder="Enter Subject Number Here">
+                    </div>
+
+                </div>*@
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label class="text-bold"> Subject Status</label>
+                        <select class="form-control" id="subjectstatus" required name="Subject_Status" placeholder="Enter Subject Status Here">
+
+                                    <option>Complete</option>
+                                    <option>Early Terminated</option>
+                                    <option>Enrolled</option>
+                                    <option>Randomized</option>
+                                    <option>Screen Failed</option>
+                                    <option>Screened</option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+
+               @* <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+
+                    <div class="form-group">
+                        <label class="text-bold">Protocol Type</label>
+                        <select class="form-control" required name="protocol_type" placeholder="Enter Protocol Type Here"></select>
+
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+
+                    <div class="form-group">
+                        <label class="text-bold">Sponsor Notified</label>
+                        <input type="datetime-local" onkeyup="limitText(this,40)" class="form-control" required name="Sponsor_Notified" placeholder="Select Sponsor_Notified Here">
+                    </div>
+                </div>
+
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+
+                    <div class="form-group">
+                        <label class="text-bold">Reportable to Ethics</label>
+                        <select class="form-control" required name="Reportable_to_Ethics" placeholder="Select Reportable to Ethics Here">
+                            <option> -- Select an Option -- </option>
+                            <option>Yes</option>
+                            <option>No</option>-
+                        </select>
+                    </div>
+                </div>
+
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label class="text-bold">Ethics Notified</label>
+                        <select class="form-control" required name="Ethics_Notified" placeholder="Select Ethics Notified Here">
+                            <option>-- Select an Option --</option>
+                            <option>Yes</option>
+                            <option>No</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label class="text-bold">Reported by Investigator Site<span class="text-danger">*</span></label>
+                        <select class="form-control" required name="Reported_by_Investigator_Site" placeholder="Select Reported by Investigator Site Here">
+                            <option>-- Select an Option --</option>
+                            <option>Yes</option>
+                            <option>No</option>
+                        </select>
+                    </div>
+                </div>*@
+
+
+
+
+
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                        <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group text-right">
+                        <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="panel p-20 m-10">
+
+    <div class="row">
+
+        <center><u><h3>Protocol Deviations List</h3></u></center>
+
+    </div>
+
+    @if(ViewBag.Role!=4 && ViewBag.Role!=5)
+    {
+ <div class="row">
+        <div class="col-md-8"></div>
+        <div class="col-md-2 pull-right btn-block">
+            <a href="@Url.Action("AddProtocolDeviations","Studies",new{ id= @ViewBag.StudyId})" class="btn btn-primary m-5 pull-right">Add New</a>
+        </div>
+    </div>
+    
+    }
+   
+
+
+    <input type="hidden" id="way" value="@ViewBag.Way" />
+
+
+    <div class="table-responsive">
+        <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+            <thead class="bg-indigo-800">
+                <tr>
+                    <th class="text-bold" hidden>...</th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Primary CRA
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Subject
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Subject Status
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Sponsor Notified
+                    </th>
+
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Reportable to Ethics
+                    </th>
+
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Ethics Notified
+                    </th>
+                    
+                      <th class="text-bold text-center" style="min-width:130px">
+                        Action
+                    </th>  
+                    
+
+                         
+
+                    
+                   
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+
+
+
+<script>
+
+
+        $.ajax({
+           
+        type: 'GET',
+        url: "@Url.Action("GetAllStudies","Ajax")",
+        
+        dataType: "json",
+        success: function(response) {
+            console.log(response);
+           
+
+            for (var i = 0; i < response.length; i++) {
+                $('#orgstudies').append($('<option>', {
+                    value: response[i].id,
+                    text: response[i].protocol_Title
+                }));
+            }
+
+        },
+        error: function() {
+            alert("Ajax failed");
+        }
+
+
+   });
+    
+
+    </script>
+
+
+<script>
+
+    var way = $('#way').val();
+
+    loadTable();
+
+   // function loadTable(Primary_CRA, Subject, Subject_Status, protocol_type, Sponsor_Notified, Reportable_to_Ethics, Ethics_Notified, Reported_by_Investigator_Site) {
+    function loadTable(Primary_CRA, Subject_Status) 
+    
+    {
+        $('#userTable').DataTable(
+            {
+                "ajax":
+                {
+                    "url": '@Url.Action("GetProtocolDeviationDataTable", "Ajax")',
+                    "type": "POST",
+                    "datatype": "json",
+                    "data": {
+                        id: '@ViewBag.StudyId',investigatersiteid:'@ViewBag.investigatersiteid',Primary_CRA: Primary_CRA, Subject_Status: Subject_Status
+                    },
+                },
+                'columns':
+                    [
+                        { "data": "hidden", "name": "0" },
+                        { "data": "primary_CRA", "name": "Primary_CRA" },
+                        { "data": "subject", "name": "Subject" },
+                        { "data": "subject_Status", "name": "Subject_Status" },
+                        { "data": "sponsor_Notified", "name": "Sponsor_Notified" },
+                        { "data": "reportable_to_Ethics", "name": "Reportable_to_Ethics" },
+                        { "data": "ethics_Notified", "name": "Ethics_Notified" },
+                        { "data": "Action", "name": "0" },
+                    ],
+                'columnDefs':
+                    [
+                        {
+                            "targets": 0,
+                            "visible": false,
+                            "searchable": false,
+                            "render": function(data, type, full, meta) {
+                                return null;
+                            }
+                        },
+                        {
+                            "targets": 1,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.primary_CRA;
+                            }
+                        }, {
+                            "targets": 2,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.subject;
+                            }
+                        },
+                        {
+                            "targets": 3,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.subject_Status;
+                            }
+                        }, {
+                            "targets": 4,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.sponsor_Notified;
+                            }
+                        }, {
+                            "targets": 5,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.reportable_to_Ethics;
+                            }
+                        }, {
+                            "targets": 6,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.ethics_Notified;
+                            }
+                        },
+                       
+                       
+
+                        {
+                            "targets": 7,
+                            'className': '',
+                            'sortable': false,
+                            
+                            "render": function(data, type, full, meta) {
+
+                                if('@ViewBag.Role'!=4 && '@ViewBag.Role'!=5)
+                                {
+
+                                var x = '';
+                                var y = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:152px;padding-left:5px !important;">';
+                                // var viewprof= '<a class="btn btn-sm bg-primary fa fa-eye" href="../Admin/TakeSS?Email='+full.email+'&Pass='+full.password+'" title="View User Profile"></a>'
+                                if (full.isActive == 3) {
+                                    x = '<button class="btn btn-sm bg-primary fa fa-solid fa-check mr-5" style="padding: 11px 15px;" onclick="AccountActivate(' + full.id + ')" title="Activate Account" ></button>';
+                                }
+                                else {
+                                    if (full.isActive == 2) {
+                                        x = '<button class="btn btn-sm bg-primary icon-stats-bars" onclick="PendingApproval(' + full.id + ')" title="Pending Approval"></button>';
+
+                                    }
+                                    else {
+                                        x = '';
+                                        y = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:101px;padding-left:5px !important;">'
+                                    }
+                                }
+
+                                return '<ul class="icons-list"> ' +
+                                    '<li class="dropdown" >' +
+                                    '			<a href="#" class="dropdown-toggle" data-toggle="dropdown">' +
+                                    '				<i class="icon-menu9"></i>' +
+                                    '			</a>' +
+                                    y +
+                                    '				<li>' +
+                                    '                   <button class="btn btn-sm bg-info icon-pencil" onclick="updateFunction(' + full.id + ')" title="Edit"></button>' +
+                                    '                   <button class="btn btn-sm bg-danger icon-bin mr-5" onclick="deleteFunction(' + full.id + ')" title="Delete"></button>' +
+                                    x +
+                                    '               </li>' +
+                                    '			</ul>' +
+                                    '		</li >' +
+                                    '	</ul >';
+
+                               }
+                               else{
+                                    var NA = "N/A";
+                                    return NA;
+                               }
+                            }
+                        },
+
+
+                        
+
+                    ],
+                "serverSide": "true",
+                "processing": "true",
+                "language":
+                {
+                    "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                    "search": "<span>Search :</span> _INPUT_",
+                    "searchPlaceholder": "Filter Data",
+                    "lengthMenu": "<span>Show :</span> _MENU_",
+                    "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                }
+            });
+    }
+
+
+    //function searchTable() {
+    //    $("#updCRA").val(response.primary_CRA);
+    //    $("#updSubject").val(response.subject);
+    //    $("#updSubjectStatus").val(response.subject_Status);
+    //    $("#updProtocolType").val(response.protocol_type);
+    //    $("#updDescription").val(response.description);
+    //    $("#updResolution").val(response.action_Resolution);
+    //    $("#updVisit").val(response.subject_Visit);
+    //    $("#updSignificance").val(response.significance);
+    //    $("#updSponsor").val(response.sponsor_Notified);
+    //    $("#updEthicsReport").val(response.reportable_to_Ethics);
+    //    $("#updEthicsNotify").val(response.ethics_Notified);
+    //    $("#updInvestigatorReport").val(response.reported_by_Investigator_Site);
+    //    $("#updInvestigatorId").val(response.investigatorSiteId);
+
+    //    $('#userTable').DataTable().clear();
+    //    $('#userTable').DataTable().destroy();
+
+    //    loadTable(name, email);
+    //}
+
+
+    function searchTable()
+    {
+       
+
+        var name = $('#primary_cra').val();
+        //var Appointment_date = $('#appointmentdate').val();
+
+        var subject_status = $('#subjectstatus').val();
+
+
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+        loadTable(name,subject_status);
+    }
+
+    function clearSearch() {
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+
+        $('#primary_cra').val("");
+        $('#subjectstatus').val("");
+
+        loadTable();
+    }
+
+
+    function updateFunction(id) {
+        $('#updEmailErrMsg').text("");
+        $('#updSubBtn').attr('disabled', false);
+
+        $("#loadImg").show();
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetProtocolDeviationById","Ajax")',
+            dataType: "json",
+            data: {
+                id: id
+            },
+            success: function(response) {
+                if (response == 0) {
+                    alert("Record not found, Please reload the page.");
+                }
+
+                var res_date = response.sponsor_Notified;
+                var new_date = res_date.split("T");
+                var sponsor_date = new_date[0];
+
+                $("#updId").val(response.id);
+
+                $("[name='Primary_CRA']").val(response.primary_CRA);
+                $("[name='Subject']").val(response.subject);
+                $("[name='Subject_Status']").val(response.subject_Status);
+                $("[name='protocol_type']").val(response.protocol_type);
+                $("[name='Description']").val(response.description);
+                $("[name='Action_Resolution']").val(response.action_Resolution);
+                $("[name='Subject_Visit']").val(response.subject_Visit);
+                $("[name='Significance']").val(response.significance);
+                $("[name='Sponsor_Notified']").val(sponsor_date);
+                $("[name='Reportable_to_Ethics']").val(response.reportable_to_Ethics);
+                $("[name='Ethics_Notified']").val(response.ethics_Notified);
+                $("[name='Reported_by_Investigator_Site']").val(response.reported_by_Investigator_Site);
+                $("[name='InvestigatorSiteId']").val(response.investigatorSiteId);
+                $("[name='StudyId']").val(response.isActive);
+                $("[name='CreatedBy']").val(response.createdBy);
+
+                //$("#updEmail").val(response.email);
+                ////$("#updContact").val(response.contact);
+                //$("#updPassword").val(response.password);
+                //$("#updGender").val(response.gender);
+                //$("#updCountry").val(response.country);
+                //$("#updCity").val(response.city);
+                //$("#updOrganization").val(response.organization);
+                //$("#updWebsite").val(response.website);
+                //$("#updDescription").val(response.description);
+                //$("#updZipCode").val(response.zipCode);
+
+
+                $("#loadImg").hide();
+                $("#updateModal").modal('show');
+            },
+            error: function() {
+                $("#loadImg").hide();
+
+                alert("ajax Failed");
+            }
+        });
+
+    }
+
+
+
+
+    function deleteFunction(id) {
+        $('#confirmModalHeading').text('Warning!');
+        $('#confirmModalHeader').removeClass('bg-success');
+        $('#confirmModalHeader').addClass('bg-danger');
+        $('#confirmModalText').empty();
+        $('#confirmModalText').append('Do you really want to delete this Record?');
+
+        $("#confirmModalForm").attr("action", '@Url.Action("DeleteProtocolDeviation","Studies")?id='+id);
+
+        //var a = document.getElementById('confirmModalId');
+        // a.href = "../Studies/DeleteProtocolDeviation?id=" + id;
+        $('#confirmModal').modal('show');
+    }
+
+
+
+    $.ajax({
+        type: 'GET',
+        url: "@Url.Action("GetAllInvestigatorSitesByStudyId","Ajax")",
+        data: {
+            id: '@ViewBag.StudyId'
+                       },
+        dataType: "json",
+        success: function(response) {
+
+
+            for (var i = 0; i < response.length; i++) {
+                $('#investigatorsitesselect').append($('<option>', {
+                    value: response[i].id,
+                    text: response[i].facility_Institution_Name +" ( "+ response[i].site_No+" ) "
+                }));
+            }
+
+        },
+        error: function() {
+            alert("Ajax failed");
+        }
+    });
+
+   $.ajax({
+           
+        type: 'GET',
+        //url: "@Url.Action("GetAllCRAsByOrganizationId","Ajax")",
+        url: "@Url.Action("GetAllCRAsByStudyId","Ajax")",
+         data: {
+            id: '@ViewBag.StudyId' },
+        dataType: "json",
+        success: function(response) {
+          
+            for (var i = 0; i < response.length; i++) {
+                $('#craLists').append($('<option>', {
+                    value: response[i].firstName+" "+ response[i].lastName,
+                    text: response[i].firstName+" "+ response[i].lastName
+                }));
+            }
+
+        },
+        error: function() {
+            alert("Ajax failed");
+        }
+
+
+   });
+
+</script>
+
+

@@ -1,0 +1,1093 @@
+﻿
+@using ClinicalWebApplication.Models
+@using Microsoft.Data.SqlClient;
+@inject SqlConnection de
+@using ClinicalWebApplication.BL
+@using System.Security.Claims;
+@{
+
+     ViewBag.Title = "View Studies";
+     var Userid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+     var CurrentUserRecord = new UserBL().GetActiveUserById(Convert.ToInt32(Userid), de);
+}
+
+<style>
+    .table > tbody > tr > td {
+        padding: 5px !important;
+    }
+</style>
+
+
+<div class="modal fade" id="updateModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="text-center text-bold">Update Study</h5>
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form action="@Url.Action("PostUpdateStudy","Admin")" method="post">
+
+                    <input type="hidden" name="Id" id="updId" />
+                    <input type="hidden" name="way" value="@ViewBag.Way" />
+
+                     <div class="panel-body">
+                            
+                            <legend class="text-bold text-uppercase"><span class="text-danger">*</span> Fields are mandatory to fill</legend>
+
+
+                            <div class="form-group">
+                                <label class="text-bold">Protocol Title <span class="text-danger">*</span></label>
+                                <input type="text" onkeyup="limitText(this,40)" class="form-control" required name="Protocol_Title" placeholder="Enter Protocol Title Here">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Condition Or Disease <span class="text-danger">*</span></label>
+                                <select id="diseases"  class="form-control" required name="Condition_Or_Disease" >
+                                    
+
+                                </select>
+                            </div> 
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Intervention/Treatment <span class="text-danger">*</span></label>
+                                <input type="text" onkeyup="limitText(this,40)" class="form-control" required name="Intervention_treatment" placeholder="Enter Intervention Treatment Here">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Phase<span class="text-danger">*</span></label>
+                                <select onkeyup="limitText(this,40)" class="form-control" required name="Phase" placeholder="Enter Phase Here">
+
+                                    <option>N/A</option>
+                                    <option>Early Phase 1 (or Phase 0)</option>
+                                    <option>Phase 1</option>
+                                    <option>Phase 1/Phase 2</option>
+                                    <option>Phase 2</option>
+                                    <option>Phase 2/Phase 3</option>
+                                    <option>Phase 3</option>
+                                    <option>Phase 4</option>
+                                </select>
+                            </div> 
+                            
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Study Type<span class="text-danger">*</span></label>
+                                <select onkeyup="limitText(this,40)" class="form-control" required name="Study_Type" placeholder="Enter Study Type Here">
+                                    <option>Interventional</option>
+                                    <option>Observational</option>
+                                    <option>Expanded Access</option>
+
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Enrollment<span class="text-danger">*</span></label>
+                                <input type="number" onkeyup="limitText(this,40)" class="form-control" required name="Enrollment" placeholder="Enter Enrollment Type Here">
+                            </div>
+                          
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Allocation<span class="text-danger">*</span></label>
+                                <select type="text" onkeyup="limitText(this,40)" class="form-control" required name="Allocation" placeholder="Enter Allocation Type Here">
+                                    <option>N/A</option>
+                                    <option>Randomized</option>
+                                    <option>Non-Randomized</option>
+
+                                </select>
+                            </div>
+                            
+                     
+
+                            <div class="form-group">
+                                <label class="text-bold">Intervention Model<span class="text-danger">*</span></label>
+                                <select type="text" onkeyup="limitText(this,40)" class="form-control" required name="Intervention_Model" placeholder="Enter Intervention Model Here">
+                                    <option>Single Group</option>
+                                    <option>Parallel</option>
+                                    <option>Crossover</option>
+                                    <option>Factorial</option>
+                                    <option>Sequential</option>
+                                </select>
+                            </div> 
+                            
+                      
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Masking<span class="text-danger">*</span></label>
+                                <input type="text" onkeyup="limitText(this,40)" class="form-control" required name="Masking" placeholder="Enter Masking Here">
+                            </div> 
+
+                            <div class="form-group">
+                                <label class="text-bold">Primary Purpose<span class="text-danger">*</span></label>
+                                <select type="text" onkeyup="limitText(this,40)" class="form-control" required name="Primary_Purpose" placeholder="Enter Primary Purpose Here">
+                                     <option>Treatment</option>
+                                    <option> Prevention</option>
+                                    <option> Diagnostic</option>
+                                    <option> Supportive Care</option>
+                                    <option> Screening</option>
+                                    <option> Health Services Research</option>
+                                    <option> Basic Science</option>
+                                    <option> Device Feasibility </option>
+                                    <option> Other</option>
+                                </select>
+                            </div>
+                       
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Actual Study Start Date<span class="text-danger">*</span></label>
+                                <input type="date" id="Acstart_date" onkeyup="limitText(this,40)" class="form-control" required name="Actual_Study_Start_Date" placeholder="Enter Start Date Here"/>
+                            </div> 
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Estimated Primary Completion Date<span class="text-danger">*</span></label>
+                                <input type="date" id="Ep_date" onkeyup="limitText(this,40)" class="form-control" required name="Estimated_Primary_Completion_Date" placeholder="Enter Estimated Primary Completion Date Here"/>
+                            </div> 
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Estimated Study Completion Date<span class="text-danger">*</span></label>
+                                <input type="date" id="EC_date" onkeyup="limitText(this,40)" class="form-control" required name="Estimated_Study_Completion_Date" placeholder="Enter Estimated Study Completion Date Here"/>
+                            </div> 
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Visit Frequency<span class="text-danger">*</span></label>
+                                <input type="text" onkeyup="limitText(this,40)" class="form-control" required name="Visit_Frequency" placeholder="Enter Visit Frequency Here">
+                            </div>  
+                            <div class="form-group">
+                                <label class="text-bold">NCT No<span class="text-danger">*</span></label>
+                                <input type="number" onkeyup="limitText(this,40)" class="form-control" required name="NCT_No" placeholder="Enter NCT Number Here">
+                            </div> 
+                            
+                         
+                         
+                            <input type="hidden" name="OrganizationId" value=""/>
+
+                            
+
+                            <input type="hidden" name="CreatedBy" value="" />
+                        </div>
+                    
+
+                    <div class="modal-footer">
+                        <button type="submit" value="submit" class="btn btn-primary" id="updSubBtn">Update</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row m-10">
+    <div class="panel panel-flat text-black">
+        <div class="panel-heading" style="background: #E8ECED; padding:1px !important;">
+            <h2 class="text-center text-black">
+                Search
+            </h2>
+            <div class="heading-elements">
+                <ul class="icons-list">
+                    <li><a data-action="collapse" class="rotate-180"></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body pt-20 pb-20" style="display: none">
+            <div class="row">
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Name:</strong></label>
+                        <input type="text" class="form-control" placeholder="Search Name Here" id="searchName" style="background-color:white">
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                        <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group text-right">
+                        <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="panel p-20 m-10">
+
+    <div class="row">
+       
+            <center><u><h3>Study List</h3></u></center>
+        
+    </div>
+    @if (CurrentUserRecord.Role == 1 || CurrentUserRecord.Role==2)
+    {
+        <div class="row">
+            <div class="col-md-8"></div>
+        <div class="col-md-2 pull-right btn-block">
+            <a href="@Url.Action("AddStudy","Admin", new{ cat= @ViewBag.category})" class="btn btn-primary m-5 pull-right">Add New</a>
+        </div>
+    </div>
+    }
+
+    <input type="hidden" id="way" value="@ViewBag.Way" />
+
+
+    <div class="table-responsive">
+        <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+            <thead class="bg-indigo-800">
+                <tr>
+                    <th class="text-bold" hidden>...</th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Protocol Title
+                    </th>
+                       <th class="text-bold text-center" style="min-width:140px;">
+                     Condition Or Disease
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                           Intervention Treatment
+                           
+                     </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                           Phase
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                            Study Type
+                    </th>
+                    @*   <th class="text-bold text-center" style="min-width:140px;">
+                        Enrollment
+                    </th>
+                       <th class="text-bold text-center" style="min-width:140px;">
+                        Allocation
+                    </th>
+                       <th class="text-bold text-center" style="min-width:140px;">
+                        Randomized
+                    </th>
+                       <th class="text-bold text-center" style="min-width:140px;">
+                        Intervention Model
+                    </th> 
+                    
+                    <th class="text-bold text-center" style="min-width:140px;">
+                       Parallel Assignement
+                    </th> 
+                    
+                    <th class="text-bold text-center" style="min-width:140px;">
+                      Masking
+                    </th>
+                     <th class="text-bold text-center" style="min-width:140px;">
+                      Primary Purpose
+                    </th> *@
+                    
+                    <th class="text-bold text-center" style="min-width:140px;">
+                      Primary Purpose
+                    </th>
+                    
+                    <th class="text-bold text-center" style="min-width:140px;">
+                      Visit Frequency
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                      NCT No
+                    </th>
+                   <th class="text-bold text-center" style="min-width:140px;">
+                      View InvestigatorSite
+                    </th>
+                    <th class="text-bold text-center" style="min-width:130px">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<script>
+
+    var x = `Abdominal aortic aneurysm
+                            Acne
+                            Acute cholecystitis
+                            Acute lymphoblastic leukaemia
+                            Acute lymphoblastic leukaemia: Children
+                            Acute lymphoblastic leukaemia: Teenagers and young adults
+                            Acute myeloid leukaemia
+                            Acute myeloid leukaemia: Children
+                            Acute myeloid leukaemia: Teenagers and young adults
+                            Acute pancreatitis
+                            Addison's disease
+                            Alcohol-related liver disease
+                            Allergic rhinitis
+                            Allergies
+                            Alzheimer's disease
+                            Anal cancer
+                            Anaphylaxis
+                            Angioedema
+                            Ankylosing spondylitis
+                            Anorexia nervosa
+                            Anxiety
+                            Anxiety disorders in children
+                            Appendicitis
+                            Arthritis
+                            Asbestosis
+                            Asthma
+                            Atopic eczema
+                            Attention deficit hyperactivity disorder (ADHD)
+                            Autistic spectrum disorder (ASD)
+                            Bacterial vaginosis
+                            Benign prostate enlargement
+                            Bile duct cancer (cholangiocarcinoma)
+                            Binge eating
+                            Bipolar disorder
+                            Bladder cancer
+                            Blood poisoning (sepsis)
+                            Bone cancer
+                            Bone cancer: Teenagers and young adults
+                            Bowel cancer
+                            Bowel incontinence
+                            Bowel polyps
+                            Brain stem death
+                            Brain tumours
+                            Brain tumours: Children
+                            Brain tumours: Teenagers and young adults
+                            Breast cancer (female)
+                            Breast cancer (male)
+                            Bronchiectasis
+                            Bronchitis
+                            Bulimia
+                            Bunion
+                            Carcinoid syndrome and carcinoid tumours
+                            Catarrh
+                            Cellulitis
+                            Cervical cancer
+                            Chest infection
+                            Chest pain
+                            Chickenpox
+                            Chilblains
+                            Chlamydia
+                            Chronic fatigue syndrome
+                            Chronic kidney disease
+                            Chronic lymphocytic leukaemia
+                            Chronic myeloid leukaemia
+                            Chronic obstructive pulmonary disease
+                            Chronic pain
+                            Chronic pancreatitis
+                            Cirrhosis
+                            Clostridium difficile
+                            Coeliac disease
+                            Cold sore
+                            Coma
+                            Common cold
+                            Common heart conditions
+                            Congenital heart disease
+                            Conjunctivitis
+                            Constipation
+                            Coronavirus (COVID-19)
+                            Cough
+                            Crohn's disease
+                            Croup
+                            Cystic fibrosis
+                            Cystitis
+                            Deafblindness
+                            Deep vein thrombosis
+                            Dehydration
+                            Dementia
+                            Dementia with Lewy bodies
+                            Dental abscess
+                            Depression
+                            Dermatitis herpetiformis
+                            Diabetes
+                            Diarrhoea
+                            Discoid eczema
+                            Diverticular disease and diverticulitis
+                            Dizziness (Lightheadedness)
+                            Down's syndrome
+                            Dry mouth
+                            Dysphagia (swallowing problems)
+                            Dystonia
+                            Earache
+                            Earwax build-up
+                            Ebola virus disease
+                            Ectopic pregnancy
+                            Endometriosis
+                            Epilepsy
+                            Erectile dysfunction (impotence)
+                            Escherichia coli (E. coli) O157
+                            Ewing sarcoma
+                            Ewing sarcoma: Children
+                            Eye cancer
+                            Febrile seizures
+                            Fever in adults
+                            Fever in children
+                            Fibroids
+                            Fibromyalgia
+                            Flatulence
+                            Flu
+                            Foetal alcohol syndrome
+                            Food poisoning
+                            Functional neurological disorder (FND)
+                            Fungal nail infection
+                            Gallbladder cancer
+                            Gallstones
+                            Ganglion cyst
+                            Gastroenteritis
+                            Gastro-oesophageal reflux disease (GORD)
+                            Genital herpes
+                            Genital warts
+                            Germ cell tumours
+                            Glandular fever
+                            Gonorrhoea
+                            Gout
+                            Gum disease
+                            Haemorrhoids (piles)
+                            Hand, foot and mouth disease
+                            Hay fever
+                            Head and neck cancer
+                            Head lice and nits
+                            Headaches
+                            Hearing loss
+                            Heart failure
+                            Hepatitis A
+                            Hepatitis B
+                            Hepatitis C
+                            Hiatus hernia
+                            High cholesterol
+                            HIV
+                            Hodgkin lymphoma
+                            Hodgkin lymphoma: Children
+                            Hodgkin lymphoma: Teenagers and young adults
+                            Huntington's disease
+                            Hyperglycaemia (high blood sugar)
+                            Hyperhidrosis
+                            Hypoglycaemia (low blood sugar)
+                            Idiopathic pulmonary fibrosis
+                            Impetigo
+                            Indigestion
+                            Ingrown toenail
+                            Inherited heart conditions
+                            Insomnia
+                            Iron deficiency anaemia
+                            Irritable bowel syndrome (IBS)
+                            Irritable hip
+                            Itching
+                            Itchy bottom
+                            Kaposi's sarcoma
+                            Kidney cancer
+                            Kidney infection
+                            Kidney stones
+                            Labyrinthitis
+                            Lactose intolerance
+                            Laryngeal (larynx) cancer
+                            Laryngitis
+                            Leg cramps
+                            Lichen planus
+                            Liver cancer
+                            Liver disease
+                            Liver tumours
+                            Loss of libido
+                            Lung cancer
+                            Lupus
+                            Lyme disease
+                            Lymphoedema
+                            Lymphogranuloma venereum (LGV)
+                            Malaria
+                            Malignant brain tumour (cancerous)
+                            Malnutrition
+                            Measles
+                            Meningitis
+                            Menopause
+                            Mesothelioma
+                            Middle ear infection (otitis media)
+                            Migraine
+                            Miscarriage
+                            Motor neurone disease (MND)
+                            Mouth cancer
+                            Mouth ulcer
+                            Multiple myeloma
+                            Multiple sclerosis (MS)
+                            Mumps
+                            Meniere's disease
+                            Myasthenia gravis
+                            Nasal and sinus cancer
+                            Nasopharyngeal cancer
+                            Neuroblastoma: Children
+                            Neuroendocrine tumours
+                            Non-alcoholic fatty liver disease (NAFLD)
+                            Non-Hodgkin lymphoma
+                            Non-Hodgkin lymphoma: Children
+                            Norovirus
+                            Nosebleed
+                            Obesity
+                            Obsessive compulsive disorder (OCD)
+                            Obstructive sleep apnoea
+                            Oesophageal cancer
+                            Oral thrush in adults
+                            Osteoarthritis
+                            Osteoporosis
+                            Osteosarcoma
+                            Otitis externa
+                            Ovarian cancer
+                            Ovarian cancer: Teenagers and young adults
+                            Ovarian cyst
+                            Overactive thyroid
+                            Paget's disease of the nipple
+                            Pancreatic cancer
+                            Panic disorder
+                            Parkinson's disease
+                            Pelvic inflammatory disease
+                            Pelvic organ prolapse
+                            Penile cancer
+                            Peripheral neuropathy
+                            Personality disorder
+                            Pleurisy
+                            Pneumonia
+                            Polymyalgia rheumatica
+                            Post-polio syndrome
+                            Post-traumatic stress disorder (PTSD)
+                            Postnatal depression
+                            Pregnancy and baby
+                            Pressure ulcers
+                            Prostate cancer
+                            Psoriasis
+                            Psoriatic arthritis
+                            Psychosis
+                            Pubic lice
+                            Rare tumours
+                            Raynaud's phenomenon
+                            Reactive arthritis
+                            Restless legs syndrome
+                            Retinoblastoma: Children
+                            Rhabdomyosarcoma
+                            Rheumatoid arthritis
+                            Ringworm and other fungal infections
+                            Rosacea
+                            Scabies
+                            Scarlet fever
+                            Schizophrenia
+                            Scoliosis
+                            Septic shock
+                            Shingles
+                            Shortness of breath
+                            Sickle cell disease
+                            Sinusitis
+                            Sjogren's syndrome
+                            Skin cancer (melanoma)
+                            Skin cancer (non-melanoma)
+                            Slapped cheek syndrome
+                            Soft tissue sarcomas
+                            Soft tissue sarcomas: Teenagers and young adults
+                            Sore throat
+                            Spleen problems and spleen removal
+                            Stillbirth
+                            Stomach ache and abdominal pain
+                            Stomach cancer
+                            Stomach ulcer
+                            Streptococcus A (strep A)
+                            Stress, anxiety and low mood
+                            Stroke
+                            Sudden infant death syndrome (SIDS)
+                            Suicide
+                            Sunburn
+                            Swollen glands
+                            Syphilis
+                            Testicular cancer
+                            Testicular cancer: Teenagers and young adults
+                            Testicular lumps and swellings
+                            Thirst
+                            Threadworms
+                            Thrush
+                            Thyroid cancer
+                            Thyroid cancer: Teenagers and young adults
+                            Tinnitus
+                            Tonsillitis
+                            Tooth decay
+                            Toothache
+                            Transient ischaemic attack (TIA)
+                            Trigeminal neuralgia
+                            Tuberculosis (TB)
+                            Type 1 diabetes
+                            Type 2 diabetes
+                            Trichomonas infection
+                            Transverse myelitis
+                            Ulcerative colitis
+                            Underactive thyroid
+                            Urinary incontinence
+                            Urinary tract infection (UTI)
+                            Urinary tract infection (UTI) in children
+                            Urticaria (hives)
+                            Vaginal cancer
+                            Varicose eczema
+                            Venous leg ulcer
+                            Vertigo
+                            Vitamin B12 or folate deficiency anaemia
+                            Vomiting in adults
+                            Vulval cancer
+                            Warts and verrucas
+                            Whooping cough
+                            Wilms’ tumour
+                            Womb (uterus) cancer
+                            Yellow fever`;
+
+                var y = x.split('\n');
+                
+                for(let m=0;m<y.length;m++)
+                {
+                    $('#diseases').append($('<option>', { 
+                                value: $.trim(y[m]),
+                                text : $.trim(y[m]) 
+                            }));
+                }
+
+    </script>
+
+<script>
+
+    var way = $('#way').val();
+
+    loadTable();
+
+    function loadTable(Name, email)
+    {
+        $('#userTable').DataTable(
+        {
+            "ajax":
+            {
+                "url": '@Url.Action("GetStudiesDataTableList", "Ajax")',
+                "type": "POST",
+                "datatype": "json",
+                "data": {
+                    id:'@ViewBag.StudyId',
+                    Name: Name
+                }
+            },
+            'columns':
+            [
+                { "data": "hidden", "name": "0" },
+                { "data": "protocol_Title", "name": "Protocol_Title" },
+                { "data": "condition_Or_Disease", "name": "Condition_Or_Disease" },
+                { "data": "intervention_treatment", "name": "Intervention_treatment" }, 
+                { "data": "phase", "name": "Phase" },
+                { "data": "study_Type", "name": "Study_Type" },
+                { "data": "primary_Purpose", "name": "Primary_Purpose" },
+
+                { "data": "Action", "name": "0" },
+            ],
+            'columnDefs':
+            [
+                {
+                    "targets": 0,
+                    "visible": false,
+                    "searchable": false,
+                    "render": function (data, type, full, meta) {
+                        return null;
+                    }
+                },
+                {
+                    "targets": 1,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        //console.log(full);
+                        return full.protocol_Title ;
+                    }
+                }, 
+                
+                {
+                    "targets": 2,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.condition_Or_Disease ;
+                    }
+                },
+                  
+                {
+                    "targets": 3,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.intervention_treatment ;
+                    }
+                },
+                  
+                {
+                    "targets": 4,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.phase ;
+                    }
+                },
+                {
+                    "targets": 5,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.study_Type ;
+                    }
+                },
+                  
+                //{
+                //    "targets": 6,
+                //    'className': '',
+                //    "render": function (data, type, full, meta)
+                //    {
+                //        return full.enrollment ;
+                //    }
+                //},
+                      
+                //{
+                //    "targets": 7,
+                //    'className': '',
+                //    "render": function (data, type, full, meta)
+                //    {
+                //        return full.allocation ;
+                //    }
+                //},
+                  
+                //{
+                //    "targets": 8,
+                //    'className': '',
+                //    "render": function (data, type, full, meta)
+                //    {
+                //        return full.randomized ;
+                //    }
+                //},
+                  
+                //{
+                //    "targets": 9,
+                //    'className': '',
+                //    "render": function (data, type, full, meta)
+                //    {
+                //        return full.intervention_Model ;
+                //    }
+                //},
+                  
+                //{
+                //    "targets": 10,
+                //    'className': '',
+                //    "render": function (data, type, full, meta)
+                //    {
+                //        return full.parallel_Assignement ;
+                //    }
+                //},
+                  
+                //{
+                //    "targets": 11,
+                //    'className': '',
+                //    "render": function (data, type, full, meta)
+                //    {
+                //        return full.masking ;
+                //    }
+                //},
+                      
+                {
+                    "targets": 6,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.primary_Purpose ;
+                    }
+                },
+                  
+                //{
+                //    "targets": 6,
+                //    'className': '',
+                //    "render": function (data, type, full, meta)
+                //    {
+                //        return full.treatment ;
+                //    }
+                //},
+                  
+                {
+                    "targets": 7,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.visit_Frequency ;
+                    }
+                },
+                  
+                {
+                    "targets": 8,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return full.ncT_No ;
+                    }
+                }, 
+                {
+                    "targets": 9,
+                    'className': '',
+                    "render": function (data, type, full, meta)
+                    {
+                        return '<a  href="../../Studies/ViewInvestigatorSites?id=' + full.id + '"> View InvestigatorSite </a>' ;
+                    }
+                },
+              
+                {
+                    "targets": 10,
+                    'className': '',
+                    'sortable': false,
+                    "render": function (data, type, full, meta)
+                    {
+                        var x = '';
+                        var dltbtn = '';
+                        var edtbtn = '';
+                         //var edtbtn1 = '';
+                        //var viewinvestigation = '';
+                        
+                        if (@CurrentUserRecord.Role== 1 || @CurrentUserRecord.Role==2 ) {
+                            dltbtn = '<button class="btn btn-sm bg-danger icon-bin mr-5" onclick="deleteFunction(' + full.id + ')" title="Delete"></button>';
+                            //viewinvestigation = '<button class="btn btn-sm bg-info fa fa-eye" onclick="viewinvestigatorsite(' + full.id + ')" title="View InvestigatorSite"></button>';
+                       
+                        }
+
+                        if(@CurrentUserRecord.Role!=4 && @CurrentUserRecord.Role!=3)
+                        {
+                          
+                            if (@CurrentUserRecord.Role!=1 && @CurrentUserRecord.Role!=2) 
+                            {
+                                edtbtn = '                   <a class="btn btn-sm bg-info fa fa-eye" href="/Admin/StudyDashboard?id=' + full.id + '" title="View Study Details"></a>';
+                           
+                            }
+                            else 
+                            {
+                                edtbtn = '                   <button class="btn btn-sm bg-info icon-pencil" onclick="updateFunction(' + full.id + ')" title="Edit"></button>';
+                            }
+
+
+                        //}                       
+                     
+                        var y='<ul class="dropdown-menu dropdown-menu-right" style="min-width:101px;padding-left:5px !important;">'
+
+
+                        return '<ul class="icons-list"> ' +
+                            '<li class="dropdown" >' +
+                            '			<a href="#" class="dropdown-toggle" data-toggle="dropdown">' +
+                            '				<i class="icon-menu9"></i>' +
+                            '			</a>' +
+                                            y +
+                            '				<li>' +
+                                    edtbtn +
+                                    dltbtn +
+                                   // viewinvestigation +
+                                                x +
+                            '               </li>' +
+                            '			</ul>' +
+                            '		</li >' +
+                            '	</ul >';
+
+                   } 
+                           else 
+                        {
+                            var NA = "N/A";
+                            return NA;
+                        }
+                    }
+                },
+            ],
+            "serverSide": "true",
+            "processing": "true",
+            "language":
+            {
+                "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                "search": "<span>Search :</span> _INPUT_",
+                "searchPlaceholder": "Filter Data",
+                "lengthMenu": "<span>Show :</span> _MENU_",
+                "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+            }
+        });
+    }
+
+
+    function searchTable()
+    {
+        var name = $('#searchName').val();
+        var email = $('#searchEmail').val();
+
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+
+        loadTable(name, email);
+    }
+
+    function clearSearch()
+    {
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+
+        $('#searchName').val("");
+        $('#searchEmail').val("");
+
+        loadTable();
+    }
+
+
+    function updateFunction(id)
+    {
+        $('#updEmailErrMsg').text("");
+        $('#updSubBtn').attr('disabled', false);
+
+        $("#loadImg").show();
+
+        $.ajax({
+            type: 'POST',
+            //url: "../Ajax/GetStudyById",
+            url: "@Url.Action("GetStudyById","Ajax")",
+            dataType: "json",
+            data: {
+                id: id
+            },
+            success: function (response)
+            {
+                debugger;
+                var response_date = response.actual_Study_Start_Date;
+                var new_date =response_date.split("T");
+                var Act_date = new_date[0];
+
+
+                var res_date = response.estimated_Primary_Completion_Date;
+                var new_dt =res_date.split("T");
+                var Ep_date = new_dt[0];
+
+                var re_date = response.estimated_Study_Completion_Date;
+                var dt =re_date.split("T");
+                var Ec_date = dt[0];
+
+                if (response == 0) {
+                    alert("Record not found, Please reload the page.");
+                }
+                //console.log(response);
+                $("#updId").val(response.id);
+
+                $("[name='Protocol_Title']").val(response.protocol_Title);
+                $("[name='Condition_Or_Disease']").val($.trim(response.condition_Or_Disease));
+                 //$('#diseases').find("[value=" + response.condition_Or_Disease + "]").attr("selected", true).change();
+
+                $("[name='Intervention_treatment']").val(response.intervention_treatment);
+                $("[name='Phase']").val(response.phase);
+                $("[name='Study_Type']").val(response.study_Type);
+                $("[name='Enrollment']").val(response.enrollment);
+                $("[name='Allocation']").val(response.allocation);
+                $("[name='Intervention_Model']").val(response.intervention_Model);
+                $("[name='Masking']").val(response.masking);
+                $("[name='Primary_Purpose']").val(response.primary_Purpose);
+                //$("[name='Actual_Study_Start_Date']").val(response.actual_Study_Start_Date); // it append value only in date time locale
+                $("[name='Actual_Study_Start_Date']").val(Act_date);
+                $("[name='Estimated_Primary_Completion_Date']").val(Ep_date);
+                $("[name='Estimated_Study_Completion_Date']").val(Ec_date);
+                $("[name='Visit_Frequency']").val(response.visit_Frequency);
+                $("[name='NCT_No']").val(response.ncT_No);
+                $("[name='CreatedBy']").val(response.createdBy);
+                $("[name='OrganizationId']").val(response.organizationId);
+            
+     
+                //$("#updEmail").val(response.email);
+                ////$("#updContact").val(response.contact);
+                //$("#updPassword").val(response.password);
+                //$("#updGender").val(response.gender);
+                //$("#updCountry").val(response.country);
+                //$("#updCity").val(response.city);
+                //$("#updOrganization").val(response.organization);
+                //$("#updWebsite").val(response.website);
+                //$("#updDescription").val(response.description);
+                //$("#updZipCode").val(response.zipCode);
+
+
+                $("#loadImg").hide();
+                $("#updateModal").modal('show');
+            },
+            error: function ()
+            {
+                $("#loadImg").hide();
+
+                alert("Relod the page!");
+            }
+        });
+
+    }
+
+  
+    function viewinvestigatorsite(id)
+    {
+    window.location.href ="/Studies/ViewInvestigatorSites?id=" + id ;
+
+    }
+
+
+    function deleteFunction(id) {
+        $('#confirmModalHeading').text('Warning!');
+        $('#confirmModalHeader').removeClass('bg-success');
+        $('#confirmModalHeader').addClass('bg-danger');
+        $('#confirmModalText').empty();
+        $('#confirmModalText').append('Do you really want to delete this Record?<br />'); 
+            
+           
+
+        $("#confirmModalForm").attr("action", "/Admin/DeleteStudy?id=" + id + "&way=@ViewBag.Way");
+
+        $('#confirmModal').modal('show');
+    }
+
+    
+                
+
+</script>
+
+
+
+
+<script>
+
+    $('#Acstart_date').attr('min', new Date($.now()).toISOString().slice(0, 16));
+    $(document).on("change", "#Acstart_date", function() {
+        debugger;
+        var date = $(this).val();
+        var tempdt = date.split("T");
+
+        //var tomorrow = date.setDate(date.getDate() + 1);
+        var newDate = new Date(date);
+
+        //var tomorrow = date.add(1).day();
+
+       //var today = moment();
+        var tomorrow = moment(newDate).add(1, 'days').format("YYYY-MM-DD");
+        var minDate = tomorrow+'T'+tempdt[1];
+
+        $('#Ep_date').val("");
+        $('#Ep_date').attr('min', minDate);
+        //$('#EC_date').val("");
+        //$('#EC_date').attr('min', date);
+
+    });
+
+    $(document).on("change", "#Ep_date", function() {
+        debugger
+        var date = $(this).val();
+
+         var tempdt = date.split("T");
+
+        //var tomorrow = date.setDate(date.getDate() + 1);
+        var newDate = new Date(date);
+
+        //var tomorrow = date.add(1).day();
+
+       //var today = moment();
+        var tomorrow = moment(newDate).add(1, 'days').format("YYYY-MM-DD");
+        var minDate = tomorrow+'T'+tempdt[1];
+
+
+        $('#EC_date').val("");
+        $('#EC_date').attr('min', minDate);
+
+    });
+</script>

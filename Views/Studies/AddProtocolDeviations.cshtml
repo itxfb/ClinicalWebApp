@@ -1,0 +1,525 @@
+﻿@using ClinicalWebApplication.Models
+@using Microsoft.Data.SqlClient;
+@inject SqlConnection de
+@using ClinicalWebApplication.BL
+@using System.Security.Claims;
+@{
+    ViewBag.Title = "Add Protocol Deviations";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var Userid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+    var CurrentUserRecord = new UserBL().GetActiveUserById(Convert.ToInt32(Userid), de);
+
+}
+
+<div class="p-20">
+
+    <div class="row">
+        <form action="@Url.Action("PostAddProtocolDeviation", "Studies")" method="post" enctype="multipart/form-data">
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-flat">
+                        <div class="panel-heading">
+
+                            <h2 class="panel-title text-center text-bold">Add Protocol Deviation</h2>
+
+                        </div>
+
+                        <div class="panel-body">
+
+                            <legend class="text-bold text-uppercase"><span class="text-danger">*</span> Fields are mandatory to fill</legend>
+
+                             @if (ViewBag.Role == 1)
+                            {
+                                <div class="form-group">
+                                    <label class="text-bold">Select Organization<span class="text-danger">*</span></label>
+                                    <select id="Organization_Id" onchange="getorganizationstudies(this.value)" class="form-control" name="OrganizationId"  required>
+                                        <option disabled>--select an option--</option>
+                                        <option hidden></option>
+
+                                    </select>
+                                </div>
+
+                            }
+                            
+
+                            else
+                            {
+                                <input type="hidden" name="OrganizationId" value="@ViewBag.organizationid" />
+                            }
+
+                            @if(ViewBag.Role != 3)
+                            {
+                                  <div class="form-group">
+                       
+                           <label class="text-bold">Select Study<span class="text-danger">*</span></label><strong id="nostudyselect" style="color:red"></strong>
+                            <select id="orgstudies" onchange="GetInvestiGatorSite(this.value)" class="form-control" required name="StudyId" placeholder="Select A Study">
+                                <option value="" > -- Select a Study -- </option>   
+
+                            </select>
+                            
+                                </div>
+
+                            }
+                            else
+                            {
+                                <input type="hidden" name="StudyId" value="@ViewBag.StudyId" />
+                                
+
+                            }
+
+                            <div class="form-group">
+                                <label class="text-bold"> Primary CRA <span class="text-danger">*</span></label>
+                                @*<input type="text" onkeyup="limitText(this,40)" class="form-control" required name="Primary_CRA" placeholder="Enter Primary CRA Name Here">*@
+                                <select id="craLists" class="form-control" required name="Primary_CRA" placeholder="Select Primary CRA Here">
+                                   
+                                </select>
+
+                            </div>
+
+                             <div class="form-group">
+                       
+                           <label class="text-bold">Investigator Site (Site No)<span class="text-danger">*</span></label>
+                            <select id="investigatorSites" class="form-control" required name="InvestigatorSiteId" placeholder="Select Investigator Site Here">
+                                   
+                            </select>
+                            
+                        </div>
+
+
+                            <div class="form-group">
+                                <label class="text-bold"> Subject <span class="text-danger">*</span></label>
+                                <input type="number" min="0" onkeyup="limitText(this,40)" class="form-control" required name="Subject" placeholder="Enter Subject Number Here">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold"> Subject Status <span class="text-danger">*</span></label>
+                                <select class="form-control" required name="Subject_Status" placeholder="Enter Subject Status Here">
+                                    
+                                    <option>Complete</option>
+                                    <option>Early Terminated</option>
+                                    <option>Enrolled</option>
+                                    <option>Randomized</option>
+                                    <option>Screen Failed</option>
+                                    <option>Screened</option>
+
+                                </select>
+                            </div>
+
+                            @*<div class="form-group">
+                                <label class="text-bold">Protocol Type<span class="text-danger">*</span></label>
+                                <select class="form-control" required name="protocol_type" placeholder="Enter Protocol Type Here"></select>
+
+                            </div>*@
+
+                            
+                            <div class="form-group">
+                                <label class="text-bold"> Description <span class="text-danger">*</span></label>
+                                <textarea onkeyup="limitText(this,40)" class="form-control" required name="Description" placeholder="Enter Description Here"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Action Resolution<span class="text-danger">*</span></label>
+                                <textarea class="form-control" required name="Action_Resolution" placeholder="Enter Action Resolution Here"></textarea>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="text-bold">Subject Visit<span class="text-danger">*</span></label>
+
+                                <input type="text" onkeyup="limitText(this,40)" class="form-control" required name="Subject_Visit" placeholder="Enter A Text Regarding Your Subject Visit">
+
+                                @*<select class="form-control" required name="Subject_Visit" placeholder="Select Subject Visit Here">
+                                    <option>Complete</option>
+                                    <option>Early Terminated</option>
+                                    <option>Enrolled</option>
+                                    <option>Randomized</option>
+                                    <option>Screen Failed</option>
+                                    <option>Screenedrolled</option>
+                                </select>*@
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Significance<span class="text-danger">*</span></label>
+                                <select class="form-control"  name="Significance" placeholder="Select Significance Here" required>
+                                    <option>Significant</option>
+                                    <option>Not Significant</option>
+
+                                </select>
+                            </div>
+
+                             <div class="form-group">
+                                <label class="text-bold">Sponsor Notified<span class="text-danger">*</span></label>
+                                <input type="date" id="sponsor_date" onkeyup="limitText(this,40)" class="form-control" required name="Sponsor_Notified">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Reportable to Ethics<span class="text-danger">*</span></label>
+                                <select class="form-control" required name="Reportable_to_Ethics" placeholder="Select Reportable to Ethics Here">
+                                    <option value=""> -- Select an Option -- </option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div> 
+                            
+                            
+                            <div class="form-group">
+                                <label class="text-bold">Ethics Notified<span class="text-danger">*</span></label>
+                                <select class="form-control" onchange="showethicsnotifieddate(this.value)" required name="Ethics_Notified" placeholder="Select Ethics Notified Here">
+                                    <option value=""> -- Select an Option --</option>
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                            </div>  
+                            <div class="form-group" id="EthicNotify_Date" style="display:none">
+                                <label class="text-bold">Ethics Notified Date</label>
+                                <input type="date" id="Ethics_Date"  class="form-control"  name="Ethics_Notified_Date" placeholder="Select Ethics_Notified Here">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Reported by Investigator Site<span class="text-danger">*</span></label>
+                                <select class="form-control" required name="Reported_by_Investigator_Site" placeholder="Select Reported by Investigator Site Here">
+                                    <option value=""> -- Select an Option -- </option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+
+                           
+
+
+                      
+                           
+
+
+
+                            <input type="hidden" name="CreatedBy" value="@ViewBag.UserId" />
+                            <input type="hidden" name="StudyId" value="@ViewBag.UserId" />
+
+
+                            <div class="text-right">
+                                <button type="submit" id="subBtn" class="btn btn-primary">Add <i class="icon-database-insert position-right"></i></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+<script>
+
+     if ('@ViewBag.Role' == '1') {
+
+        debugger;
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllOrganizations","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) 
+                {
+                    $('#Organization_Id').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].name
+                    }));
+                }
+
+            },
+
+            error: function() {
+                alert("Ajax failed");
+            }
+
+        });
+
+    }
+
+
+    if ('@ViewBag.Role' == '2') {
+    
+     
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) {
+
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+    }
+
+
+      function getorganizationstudies(value)
+      
+     {
+      
+        console.log("function call");
+         $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetAllStudies","Ajax")',
+            data:
+            {
+                organizationid:value
+            },
+            //dataType: "json",
+            success: function(response) {
+
+        
+
+                for (var i = 0; i < response.length; i++) {
+                    $('#orgstudies').append($('<option>', {
+                        value: response[i].id,
+                        text: response[i].protocol_Title
+                    }));
+                }
+
+            },
+            error: function() {
+                alert("Ajax failed");
+            }
+        });
+
+     }
+
+
+</script>
+
+<script>
+
+    //  $.ajax({
+           
+    //    type: 'GET',
+    //    url: "@Url.Action("GetAllInvestigatorSitesByStudyId","Ajax")",
+    //    data: {
+            
+    //        id: '@ViewBag.StudyId'
+    //        //id: studyid
+    //                   },
+    //    dataType: "json",
+    //    success: function(response) {
+    //        console.log(response);
+       
+    //        $('#investigatorSites').empty("");
+    //        for (var i = 0; i < response.length; i++) {
+    //            $('#investigatorSites').append($('<option>', {
+    //                value: response[i].id,
+    //                text: response[i].facility_Institution_Name +" ( " + response[i].site_No +" ) "
+    //            }));
+    //        }
+
+    //    },
+    //    error: function() {
+    //        alert("Ajax failed");
+    //    }
+    //});
+if ('@ViewBag.Role' == '3')
+{
+    debugger;
+    GetInvestiGatorSite('@ViewBag.StudyId');
+
+    GetCraByStudyId('@ViewBag.StudyId');
+}
+
+function GetInvestiGatorSite(studyid)
+{
+  
+    debugger;
+    if (studyid == "" || studyid == null) {
+
+        $("#nostudyselect").html("please select a study");
+        $("#nostudyselect").fadeOut(5000);
+    }
+    else
+    {
+        $("#nostudyselect").html("");
+         $.ajax({
+           
+        type: 'GET',
+        url: "@Url.Action("GetAllInvestigatorSitesByStudyId","Ajax")",
+        data: {
+            //id: '@ViewBag.StudyId'
+            id: studyid
+                       },
+        dataType: "json",
+        success: function(response) {
+            console.log(response);
+            debugger;
+            $('#investigatorSites').empty("");
+            for (var i = 0; i < response.length; i++) {
+                $('#investigatorSites').append($('<option>', {
+                    value: response[i].id,
+                    text: response[i].facility_Institution_Name +" ( " + response[i].site_No +" ) "
+                }));
+            }
+
+
+
+
+        },
+        error: function() {
+            alert("Ajax failed");
+        }
+    });
+
+    if ('@ViewBag.Role' != '3')
+
+{
+        GetCraByStudyId(studyid);
+}
+          
+   }
+   
+
+}
+
+function GetCraByStudyId(studyid)
+{
+    debugger;
+
+ $.ajax({
+           
+        type: 'GET',
+        url: "@Url.Action("GetAllCRAsByStudyId","Ajax")",
+         data: {
+           // id: '@ViewBag.OrganizationId' },
+            id: studyid },
+        dataType: "json",
+        success: function(response) {
+          
+        $('#craLists').empty("");
+
+            for (var i = 0; i < response.length; i++) {
+                $('#craLists').append($('<option>', {
+                    value: response[i].firstName+" "+ response[i].lastName,
+                    text: response[i].firstName+" "+ response[i].lastName
+                }));
+            }
+
+        },
+        error: function() {
+            alert("Ajax failed");
+        }
+
+
+   });
+
+}
+       
+
+
+    
+    //get studies
+   //     $.ajax({
+           
+   //     type: 'GET',
+   //     url: "@Url.Action("GetAllStudies","Ajax")",
+        
+   //     dataType: "json",
+   //     success: function(response) {
+   //         console.log(response);
+        
+
+   //         for (var i = 0; i < response.length; i++) {
+   //             $('#orgstudies').append($('<option>', {
+   //                 value: response[i].id,
+   //                 text: response[i].protocol_Title
+   //             }));
+   //         }
+
+   //     },
+   //     error: function() {
+   //         alert("Ajax failed");
+   //     }
+
+
+   //});   
+   
+   
+   //$.ajax({
+           
+   //     type: 'GET',
+   //     url: "@Url.Action("GetAllCRAsByOrganizationId","Ajax")",
+   //      data: {
+   //         id: '@ViewBag.OrganizationId' },
+   //     dataType: "json",
+   //     success: function(response) {
+          
+        
+
+   //         for (var i = 0; i < response.length; i++) {
+   //             $('#craLists').append($('<option>', {
+   //                 value: response[i].firstName+" "+ response[i].lastName,
+   //                 text: response[i].firstName+" "+ response[i].lastName
+   //             }));
+   //         }
+
+   //     },
+   //     error: function() {
+   //         alert("Ajax failed");
+   //     }
+
+
+   //});
+    
+
+    </script>
+
+
+    <script>
+        function showethicsnotifieddate(value)
+        {
+            if (value == "Yes") {
+
+                $("#EthicNotify_Date").show();
+                $("#Ethics_Date").val("");
+
+            }
+            else
+            {
+                $("#EthicNotify_Date").hide();
+                $("#Ethics_Date").val("");
+
+                
+            }
+
+        }
+
+    </script>
+
+         <script>
+
+
+    validdates();
+    function validdates() {
+        debugger;
+        $('#Ethics_Date').attr('min', new Date($.now()).toISOString().slice(0, 10));
+        $('#sponsor_date').attr('min', new Date($.now()).toISOString().slice(0, 10));
+
+
+    }
+
+
+
+
+                    </script>

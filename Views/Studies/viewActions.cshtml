@@ -1,0 +1,683 @@
+﻿@{
+    ViewData["Title"] = "viewActions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    .table > tbody > tr > td {
+        padding: 5px !important;
+    }
+</style>
+
+
+<div class="modal fade" id="updateModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="text-center text-bold">Update Action</h5>
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form action="@Url.Action("PostUpdateActions", "Studies")" method="post" enctype="multipart/form-data">
+
+                    <div class="form-group">
+                        <label class="text-bold"> Meeting Date <span class="text-danger">*</span></label>
+                        <input type="datel" class="form-control" required name="Meeting_Date">
+                    </div>
+
+                    @*<div class="form-group">
+                    <label class="text-bold">Study<span class="text-danger">*</span></label>
+                    <input type="text" min="0" onkeyup="limitText(this,40)" class="form-control" required name="StudyId" value="2" placeholder="Enter Subject Number Here">
+                    </div>*@
+                    <div class="form-group" hidden>
+
+                        <label class="text-bold">Select Study<span class="text-danger">*</span></label>@*<strong id="nostudyselect" style="color:red"></strong>*@
+                        <select id="orgstudies" class="form-control"  name="StudyId">
+                            <option value=""> -- Select a Study -- </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold"> Status <span class="text-danger">*</span></label>
+                        <select class="form-control" id="status" required name="Status" placeholder="Enter Subject Status Here">
+                            <option>--Select Status--</option>
+                            <option>Open</option>
+                            <option>Close</option>
+
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold"> Target Close Date <span class="text-danger">*</span></label>
+                        <input type="date" id="target_date" class="form-control" required name="Targeted_Close_Date">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Action Close Detail <span class="text-danger">*</span></label>
+                        <input type="date" id="action_date" class="form-control" required name="Actual_Close_Date">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold"> Action Details <span class="text-danger">*</span></label>
+                        <textarea onkeyup="limitText(this,40)" id="action_detail" class="form-control" required name="Action_Details" placeholder="Enter Action Detail Here"></textarea>
+                    </div>
+
+
+
+
+                    @*<div class="form-group">
+
+                    <label class="text-bold">Select Study<span class="text-danger">*</span></label><strong id="nostudyselect" style="color:red"></strong>
+                    <select id="orgstudies" onchange="InvestiGatorSite(this.value)" class="form-control" required name="" placeholder="Select A Study">
+                    <option value=""> -- Select a Study -- </option>
+
+                    </select>
+
+                    </div>
+                    *@
+
+                    @*<input type="hidden" name="CreatedBy" value="@ViewBag.UserId" />*@
+                    <input type="hidden" id="actionid" name="Id" value="" />
+
+
+                    <div class="modal-footer">
+                        <button type="submit" value="submit" class="btn btn-primary" id="updSubBtn">Update</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row m-10">
+    <div class="panel panel-flat text-black">
+        <div class="panel-heading" style="background: #E8ECED; padding:1px !important;">
+            <h2 class="text-center text-black">
+                Search
+            </h2>
+            <div class="heading-elements">
+                <ul class="icons-list">
+                    <li><a data-action="collapse" class="rotate-180"></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body pt-20 pb-20" style="display: none">
+            <div class="row">
+
+
+                @*  <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+
+                <div class="form-group">
+                <label class="text-bold"> Meeting Date</label>
+                <input type="date" id="primary_cra"  class="form-control" required name="Primary_CRA">
+                </div>
+
+                </div>*@
+
+                @* <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                <div class="form-group">
+                <label class="text-bold"> Subject</label>
+                <input type="number" min="0" onkeyup="limitText(this,40)" class="form-control" required name="Subject" placeholder="Enter Subject Number Here">
+                </div>
+
+                </div>*@
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label class="text-bold"> Action Status</label>
+                        <select class="form-control" id="subjectstatus" required name="Subject_Status" placeholder="Enter Subject Status Here">
+                            <option value="">--select a value--</option>
+                            <option value="Open">Open</option>
+                            <option value="Close">Close</option>
+
+                        </select>
+                    </div>
+
+                </div>
+
+
+
+                @* <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+
+                <div class="form-group">
+                <label class="text-bold">Protocol Type</label>
+                <select class="form-control" required name="protocol_type" placeholder="Enter Protocol Type Here"></select>
+
+                </div>
+                </div>
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+
+                <div class="form-group">
+                <label class="text-bold">Sponsor Notified</label>
+                <input type="datetime-local" onkeyup="limitText(this,40)" class="form-control" required name="Sponsor_Notified" placeholder="Select Sponsor_Notified Here">
+                </div>
+                </div>
+
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+
+                <div class="form-group">
+                <label class="text-bold">Reportable to Ethics</label>
+                <select class="form-control" required name="Reportable_to_Ethics" placeholder="Select Reportable to Ethics Here">
+                <option> -- Select an Option -- </option>
+                <option>Yes</option>
+                <option>No</option>-
+                </select>
+                </div>
+                </div>
+
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                <div class="form-group">
+                <label class="text-bold">Ethics Notified</label>
+                <select class="form-control" required name="Ethics_Notified" placeholder="Select Ethics Notified Here">
+                <option>-- Select an Option --</option>
+                <option>Yes</option>
+                <option>No</option>
+                </select>
+                </div>
+                </div>
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                <div class="form-group">
+                <label class="text-bold">Reported by Investigator Site<span class="text-danger">*</span></label>
+                <select class="form-control" required name="Reported_by_Investigator_Site" placeholder="Select Reported by Investigator Site Here">
+                <option>-- Select an Option --</option>
+                <option>Yes</option>
+                <option>No</option>
+                </select>
+                </div>
+                </div>*@
+
+
+
+
+
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                        <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group text-right">
+                        <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="panel p-20 m-10">
+
+    <div class="row">
+
+        <center><u><h3>Actions List</h3></u></center>
+
+    </div>
+
+    @if (ViewBag.Role != 4 && ViewBag.Role != 5)
+    {
+        <div class="row">
+            <div class="col-md-8"></div>
+            <div class="col-md-2 pull-right btn-block">
+                <a href="@Url.Action("AddActions","Studies", new{ id= @ViewBag.StudyId})" class="btn btn-primary m-5 pull-right">Add New</a>
+            </div>
+        </div>
+
+    }
+
+
+
+    <input type="hidden" id="way" value="@ViewBag.Way" />
+
+
+    <div class="table-responsive">
+        <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+            <thead class="bg-indigo-800">
+                <tr>
+                    <th class="text-bold" hidden>...</th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Meeting Date
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Assign Study
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Action Status
+                    </th>
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Targeted Close Date
+                    </th>
+
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Actual Close Date
+                    </th>
+
+                    <th class="text-bold text-center" style="min-width:140px;">
+                        Action Details
+                    </th>
+
+                    <th class="text-bold text-center" style="min-width:130px">
+                        Action
+                    </th>
+
+
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+
+
+
+<script>
+
+    //function GetInvestiGatorSites(studyid)
+    //{
+    //    debugger;
+    //    if (studyid == "" || studyid == null) {
+
+    //        $("#nostudyselect").html("please select a study");
+    //        $("#nostudyselect").fadeOut(5000);
+    //    }
+    //    else
+    //    {
+    //        $("#nostudyselect").html("");
+    //         $.ajax({
+
+    //        type: 'GET',
+    //        url: "@Url.Action("GetAllInvestigatorSitesByStudyId","Ajax")",
+    //        data: {
+    //            //id: '@ViewBag.StudyId'
+    //            id: studyid
+    //                       },
+    //        dataType: "json",
+    //        success: function(response) {
+    //            console.log(response);
+    //            debugger;
+    //            $('#investigatorsitesselect').empty("");
+    //            for (var i = 0; i < response.length; i++) {
+    //                $('#investigatorsitesselect').append($('<option>', {
+    //                    value: response[i].id,
+    //                    text: response[i].facility_Institution_Name
+    //                }));
+    //            }
+
+    //        },
+    //        error: function() {
+    //            alert("Ajax failed");
+    //        }
+    //    });
+
+    //    }
+
+
+    //}
+
+
+    //get studies
+    $.ajax({
+
+        type: 'GET',
+        url: "@Url.Action("GetAllStudies","Ajax")",
+
+        dataType: "json",
+        success: function(response) {
+            console.log(response);
+
+
+            for (var i = 0; i < response.length; i++) {
+                $('#orgstudies').append($('<option>', {
+                    value: response[i].id,
+                    text: response[i].protocol_Title
+                }));
+            }
+
+        },
+        error: function() {
+            alert("Ajax failed");
+        }
+
+
+    });
+
+
+</script>
+
+
+<script>
+
+    var way = $('#way').val();
+
+    loadTable();
+
+    // function loadTable(Primary_CRA, Subject, Subject_Status, protocol_type, Sponsor_Notified, Reportable_to_Ethics, Ethics_Notified, Reported_by_Investigator_Site) {
+    function loadTable(Subject_Status) {
+        $('#userTable').DataTable(
+            {
+                "ajax":
+                {
+                    "url": '@Url.Action("GetActionsDataTable", "Ajax")',
+                    "type": "POST",
+                    "datatype": "json",
+                    "data": {
+                        // id: '@ViewBag.StudyId', Primary_CRA: Primary_CRA, Subject: Subject, Subject_Status: Subject_Status, protocol_type: protocol_type, Sponsor_Notified: Sponsor_Notified, Reportable_to_Ethics: Reportable_to_Ethics, Ethics_Notified: Ethics_Notified, Reported_by_Investigator_Site: Reported_by_Investigator_Site
+                        id: '@ViewBag.StudyId', dt: "", status: Subject_Status
+                    }
+                },
+                'columns':
+                    [
+                        { "data": "hidden", "name": "0" },
+                        { "data": "meeting_Date", "name": "Meeting_Date" },
+                        { "data": "studyId", "name": "StudyId" },
+                        { "data": "status", "name": "Status" },
+                        { "data": "targeted_Close_Date", "name": "Targeted_Close_Date" },
+                        { "data": "actual_Close_Date", "name": "Actual_Close_Date" },
+                        { "data": "action_Details", "name": "Action_Details" },
+                        { "data": "Action", "name": "0" },
+                    ],
+                'columnDefs':
+                    [
+                        {
+                            "targets": 0,
+                            "visible": false,
+                            "searchable": false,
+                            "render": function(data, type, full, meta) {
+                                return null;
+                            }
+                        },
+                        {
+                            "targets": 1,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.meeting_Date;
+                            }
+                        }, {
+                            "targets": 2,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                //return full.studyId;
+                                return full.study;
+                            }
+                        },
+                        {
+                            "targets": 3,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.status;
+                            }
+                        }, {
+                            "targets": 4,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.targeted_Close_Date;
+                            }
+                        }, {
+                            "targets": 5,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.actual_Close_Date;
+                            }
+                        }, {
+                            "targets": 6,
+                            'className': '',
+                            "render": function(data, type, full, meta) {
+                                return full.action_Details;
+                            }
+                        },
+
+
+
+                        {
+                            "targets": 7,
+                            'className': '',
+                            'sortable': false,
+
+                            "render": function(data, type, full, meta) {
+
+                                if ('@ViewBag.Role' != 4 && '@ViewBag.Role' != 5) {
+
+                                    var x = '';
+                                    var y = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:152px;padding-left:5px !important;">';
+                                    // var viewprof= '<a class="btn btn-sm bg-primary fa fa-eye" href="../Admin/TakeSS?Email='+full.email+'&Pass='+full.password+'" title="View User Profile"></a>'
+                                    if (full.isActive == 3) {
+                                        x = '<button class="btn btn-sm bg-primary fa fa-solid fa-check mr-5" style="padding: 11px 15px;" onclick="AccountActivate(' + full.id + ')" title="Activate Account" ></button>';
+                                    }
+                                    else {
+                                        if (full.isActive == 2) {
+                                            x = '<button class="btn btn-sm bg-primary icon-stats-bars" onclick="PendingApproval(' + full.id + ')" title="Pending Approval"></button>';
+
+                                        }
+                                        else {
+                                            x = '';
+                                            y = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:101px;padding-left:5px !important;">'
+                                        }
+                                    }
+
+                                    return '<ul class="icons-list"> ' +
+                                        '<li class="dropdown" >' +
+                                        '			<a href="#" class="dropdown-toggle" data-toggle="dropdown">' +
+                                        '				<i class="icon-menu9"></i>' +
+                                        '			</a>' +
+                                        y +
+                                        '				<li>' +
+                                        '                   <button class="btn btn-sm bg-info icon-pencil" onclick="updateFunction(' + full.id + ')" title="Edit"></button>' +
+                                        '                   <button class="btn btn-sm bg-danger icon-bin mr-5" onclick="deleteFunction(' + full.id + ')" title="Delete"></button>' +
+                                        x +
+                                        '               </li>' +
+                                        '			</ul>' +
+                                        '		</li >' +
+                                        '	</ul >';
+
+                                }
+                                else {
+                                    var NA = "N/A";
+                                    return NA;
+                                }
+                            }
+                        },
+
+
+
+
+                    ],
+                "serverSide": "true",
+                "processing": "true",
+                "language":
+                {
+                    "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                    "search": "<span>Search :</span> _INPUT_",
+                    "searchPlaceholder": "Filter Data",
+                    "lengthMenu": "<span>Show :</span> _MENU_",
+                    "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                }
+            });
+    }
+
+
+    //function searchTable() {
+    //    $("#updCRA").val(response.primary_CRA);
+    //    $("#updSubject").val(response.subject);
+    //    $("#updSubjectStatus").val(response.subject_Status);
+    //    $("#updProtocolType").val(response.protocol_type);
+    //    $("#updDescription").val(response.description);
+    //    $("#updResolution").val(response.action_Resolution);
+    //    $("#updVisit").val(response.subject_Visit);
+    //    $("#updSignificance").val(response.significance);
+    //    $("#updSponsor").val(response.sponsor_Notified);
+    //    $("#updEthicsReport").val(response.reportable_to_Ethics);
+    //    $("#updEthicsNotify").val(response.ethics_Notified);
+    //    $("#updInvestigatorReport").val(response.reported_by_Investigator_Site);
+    //    $("#updInvestigatorId").val(response.investigatorSiteId);
+
+    //    $('#userTable').DataTable().clear();
+    //    $('#userTable').DataTable().destroy();
+
+    //    loadTable(name, email);
+    //}
+
+
+    function searchTable() {
+
+        //var searchdate=  new Date(document.getElementById('primary_cra').value);
+        //searchdate = searchdate.getDate();
+        //var name = $('#primary_cra').val();
+        //var Appointment_date = $('#appointmentdate').val();
+
+        var subject_status = $('#subjectstatus').val();
+
+
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+        loadTable(subject_status);
+    }
+
+    function clearSearch() {
+        $('#userTable').DataTable().clear();
+        $('#userTable').DataTable().destroy();
+
+        $('#primary_cra').val("");
+        $('#subjectstatus').val("");
+
+        loadTable();
+    }
+
+
+    function updateFunction(id) {
+        $('#updEmailErrMsg').text("");
+        $('#updSubBtn').attr('disabled', false);
+
+        $("#loadImg").show();
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GetActionByActionId","Ajax")',
+            dataType: "json",
+            data: {
+                id: id
+            },
+            success: function(response) {
+                if (response == 0) {
+                    alert("Record not found, Please reload the page.");
+                }
+                //console.log(response);
+                var response_date = response.meeting_Date;
+                var new_date =response_date.split("T");
+                var m_date = new_date[0];
+
+
+                var res_date = response.targeted_Close_Date;
+                var new_dt =res_date.split("T");
+                var t_date = new_dt[0];
+
+                var re_date = response.actual_Close_Date;
+                var dt =re_date.split("T");
+                var Ac_date = dt[0];
+
+
+                $("#actionid").val(response.id);
+                //$('#Meeting_date').val(response.meeting_Date);
+                var meeting_date= new Date(response.m_date);
+                
+                $("[name='Meeting_Date']").val(m_date);
+                $("[name='Targeted_Close_Date']").val(t_date);
+                $("[name='Actual_Close_Date']").val(Ac_date);
+                $("[name='Action_Details']").val(response.action_Details);
+                $("[name='Status']").val(response.status);
+                $("[name='StudyId']").val(response.studyId);
+
+
+                //$("#updEmail").val(response.email);
+                ////$("#updContact").val(response.contact);
+                //$("#updPassword").val(response.password);
+                //$("#updGender").val(response.gender);
+                //$("#updCountry").val(response.country);
+                //$("#updCity").val(response.city);
+                //$("#updOrganization").val(response.organization);
+                //$("#updWebsite").val(response.website);
+                //$("#updDescription").val(response.description);
+                //$("#updZipCode").val(response.zipCode);
+
+
+                $("#loadImg").hide();
+                $("#updateModal").modal('show');
+            },
+            error: function() {
+                $("#loadImg").hide();
+
+                alert("ajax Failed");
+            }
+        });
+
+    }
+
+
+
+
+    function deleteFunction(id) {
+        $('#confirmModalHeading').text('Warning!');
+        $('#confirmModalHeader').removeClass('bg-success');
+        $('#confirmModalHeader').addClass('bg-danger');
+        $('#confirmModalText').empty();
+        $('#confirmModalText').append('Do you really want to delete this Record?');
+
+        $("#confirmModalForm").attr("action", '@Url.Action("DeleteAction","Studies")?id=' + id);
+
+        //var a = document.getElementById('confirmModalId');
+        // a.href = "../Studies/DeleteProtocolDeviation?id=" + id;
+        $('#confirmModal').modal('show');
+    }
+
+
+
+        //$.ajax({
+        //    type: 'GET',
+        //    url: "../Ajax/GetAllInvestigatorSitesByStudyId",
+        //    data: {
+        //        id: '@ViewBag.StudyId'
+        //                   },
+        //    dataType: "json",
+        //    success: function(response) {
+
+
+        //        for (var i = 0; i < response.length; i++) {
+        //            $('#investigatorsites').append($('<option>', {
+        //                value: response[i].id,
+        //                text: response[i].facility_Institution_Name
+        //            }));
+        //        }
+
+        //    },
+        //    error: function() {
+        //        alert("Ajax failed");
+        //    }
+        //});
+
+
+
+</script>
+
+
+
+
